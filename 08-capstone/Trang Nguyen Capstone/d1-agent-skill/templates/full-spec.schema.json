@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ContentFullSpec",
+  "type": "object",
+  "required": [
+    "content_id",
+    "topic",
+    "platform",
+    "format",
+    "framework_bucket",
+    "hook",
+    "caption",
+    "cta",
+    "dm_keyword",
+    "storyboard",
+    "visual_direction",
+    "qa_checklist"
+  ],
+  "properties": {
+    "content_id": {
+      "type": "string",
+      "description": "Mã ID duy nhất của bài viết, ví dụ: IG-260822-FOCUS"
+    },
+    "topic": {
+      "type": "string",
+      "description": "Tiêu đề hoặc chủ đề chính của bài viết"
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["Instagram", "Facebook", "Cross-post"]
+    },
+    "format": {
+      "type": "string",
+      "enum": ["Carousel", "Reel", "Static", "Story"]
+    },
+    "framework_bucket": {
+      "type": "string",
+      "enum": ["40_Pain", "30_System", "20_Proof", "10_Trang"]
+    },
+    "hook": {
+      "type": "string",
+      "description": "Hook mở đầu dạng visceral-parallel (2 hình ảnh tương phản)"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Nội dung caption đầy đủ dưới 150 từ"
+    },
+    "cta": {
+      "type": "string",
+      "description": "Lời kêu gọi hành động chứa DM keyword"
+    },
+    "dm_keyword": {
+      "type": "string",
+      "description": "Từ khóa viết hoa, ví dụ: FOCUS, SYSTEM, SETUP"
+    },
+    "storyboard": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["slide_or_frame", "headline", "subtext", "visual_notes", "colors", "fonts"],
+        "properties": {
+          "slide_or_frame": { "type": "integer" },
+          "headline": { "type": "string" },
+          "subtext": { "type": "string" },
+          "visual_notes": { "type": "string" },
+          "colors": { "type": "string" },
+          "fonts": { "type": "string" }
+        }
+      }
+    },
+    "visual_direction": {
+      "type": "object",
+      "required": ["concept", "reference_search_links", "color_palette", "typography_spec"],
+      "properties": {
+        "concept": { "type": "string" },
+        "reference_search_links": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" }
+        },
+        "color_palette": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "typography_spec": { "type": "string" }
+      }
+    },
+    "qa_checklist": {
+      "type": "object",
+      "required": ["honesty_check", "blacklist_check", "brand_voice_check"],
+      "properties": {
+        "honesty_check": { "type": "string", "enum": ["PASS", "FAIL"] },
+        "blacklist_check": { "type": "string", "enum": ["PASS", "FAIL"] },
+        "brand_voice_check": { "type": "string", "enum": ["PASS", "FAIL"] }
+      }
+    }
+  }
+}

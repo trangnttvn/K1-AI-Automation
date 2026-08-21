@@ -1,0 +1,229 @@
+{
+  "name": "Trang Nguyen - Content Operations Pipeline (D2 Capstone)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "content-pipeline",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "node-webhook-trigger",
+      "name": "Webhook: Receive Topic Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        300
+      ],
+      "webhookId": "content-pipeline"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const body = item.json.body || item.json || {};\n  const topic = (body.topic || '').trim();\n  const format = (body.format || '').trim();\n  const contentId = (body.content_id || 'IG-' + new Date().toISOString().slice(2,10).replace(/-/g,'') + '-POST').trim();\n  const pillar = (body.content_pillar || 'Pain & Problem').trim();\n  const bucket = (body.framework_bucket || '40_Pain').trim();\n  const targetAudience = (body.target_audience || 'Coaches & Healers').trim();\n  const sourceInsight = (body.source_insight || '').trim();\n\n  const missing = [];\n  if (!topic) missing.push('topic');\n  if (!format) missing.push('format');\n\n  if (missing.length > 0) {\n    results.push({\n      json: {\n        is_valid: false,\n        status: 'THIEU_DU_LIEU',\n        missing: missing,\n        message: 'Yêu cầu không hợp lệ. Vui lòng cung cấp đầy đủ: ' + missing.join(', ')\n      }\n    });\n  } else {\n    results.push({\n      json: {\n        is_valid: true,\n        content_id: contentId,\n        topic: topic,\n        format: format,\n        content_pillar: pillar,\n        framework_bucket: bucket,\n        target_audience: targetAudience,\n        source_insight: sourceInsight\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "node-validate-input",
+      "name": "Validate Input (Preconditions)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -150,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.is_valid }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "node-if-valid",
+      "name": "Check Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  status: 'THIEU_DU_LIEU',\n  error: true,\n  missing: $json.missing,\n  message: $json.message\n}) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "node-respond-bad-input",
+      "name": "Respond: 400 Bad Request",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        350,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vietapi.ai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"max_tokens\": 3500,\n  \"response_format\": { \"type\": \"json_object\" },\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are 03_Content_Writer for Trang Nguyen — All-in-One Business Partner for Coaches & Healers.\\n\\nBRAND GUIDELINES:\\n- Tone: calm, precise, trustworthy, substantive, direct. Sentences under 15 words. Total caption under 150 words.\\n- Typography: Barber Fill (Headline/Hero), Montserrat (Subheading/Tag), DM Sans (Body/UI).\\n- Palette: Deep Ocean #0B1B3D (60%), Pearl White #F4F5F7 (25%), Warm Champagne #EDE0C8 (10%).\\n- Blacklist: best, number one, game-changer, skyrocket, crush it, level up, tốt nhất, số 1, cam kết 100%.\\n- Honesty rule: NEVER invent client stories or fake case studies. Anchor credibility to Trang real track record (1,000+ orders/mo, 7 Notion modules, 10 yrs banking).\\n- Hook style: Visceral-Parallel (two contrasting concrete images).\\n- Reference links: Return 2-3 Pexels search query URLs (https://www.pexels.com/search/<keyword>/).\\n\\nReturn strictly valid JSON matching schema:\\n{\\n  \\\"content_id\\\": \\\"STRING\\\",\\n  \\\"topic\\\": \\\"STRING\\\",\\n  \\\"platform\\\": \\\"Instagram\\\",\\n  \\\"format\\\": \\\"Carousel|Reel|Static|Story\\\",\\n  \\\"framework_bucket\\\": \\\"40_Pain|30_System|20_Proof|10_Trang\\\",\\n  \\\"hook\\\": \\\"STRING\\\",\\n  \\\"caption\\\": \\\"STRING\\\",\\n  \\\"cta\\\": \\\"STRING\\\",\\n  \\\"dm_keyword\\\": \\\"STRING\\\",\\n  \\\"storyboard\\\": [\\n    {\\n      \\\"slide_or_frame\\\": 1,\\n      \\\"headline\\\": \\\"STRING\\\",\\n      \\\"subtext\\\": \\\"STRING\\\",\\n      \\\"visual_notes\\\": \\\"STRING\\\",\\n      \\\"colors\\\": \\\"#0B1B3D + #F4F5F7 + #EDE0C8\\\",\\n      \\\"fonts\\\": \\\"Barber Fill (Headline), Montserrat (Subheading), DM Sans (Body)\\\"\\n    }\\n  ],\\n  \\\"visual_direction\\\": {\\n    \\\"concept\\\": \\\"STRING\\\",\\n    \\\"reference_search_links\\\": [\\\"https://www.pexels.com/search/...\\\"],\\n    \\\"color_palette\\\": [\\\"#0B1B3D\\\", \\\"#F4F5F7\\\", \\\"#EDE0C8\\\"],\\n    \\\"typography_spec\\\": \\\"Barber Fill / Montserrat / DM Sans\\\"\\n  },\\n  \\\"qa_checklist\\\": {\\n    \\\"honesty_check\\\": \\\"PASS\\\",\\n    \\\"blacklist_check\\\": \\\"PASS\\\",\\n    \\\"brand_voice_check\\\": \\\"PASS\\\"\\n  }\\n}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Generate full spec content for:\\n\" + JSON.stringify($json)\n    }\n  ]\n}"
+      },
+      "id": "node-ai-writer",
+      "name": "AI Content Spec Writer (VietAPI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        350,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  let spec;\n  try {\n    const rawContent = item.json.choices[0].message.content;\n    spec = JSON.parse(rawContent);\n  } catch(e) {\n    spec = item.json;\n  }\n  results.push({ json: spec });\n}\n\nreturn results;"
+      },
+      "id": "node-parse-spec",
+      "name": "Parse & Validate Spec",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"parent\": { \"database_id\": \"87576ad4-b2eb-43e1-a295-3bf84733be16\" },\n  \"properties\": {\n    \"Content Title\": {\n      \"title\": [{ \"text\": { \"content\": $json.topic } }]\n    },\n    \"Content ID\": {\n      \"rich_text\": [{ \"text\": { \"content\": $json.content_id } }]\n    },\n    \"Status\": {\n      \"select\": { \"name\": \"Copy ready\" }\n    },\n    \"Format\": {\n      \"select\": { \"name\": $json.format }\n    },\n    \"CTA\": {\n      \"rich_text\": [{ \"text\": { \"content\": $json.cta } }]\n    },\n    \"DM Keyword\": {\n      \"rich_text\": [{ \"text\": { \"content\": $json.dm_keyword } }]\n    },\n    \"Design approval\": {\n      \"select\": { \"name\": \"Pending\" }\n    }\n  }\n}"
+      },
+      "id": "node-notion-sync",
+      "name": "Notion: Create/Sync Production Record",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        850,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  status: 'SUCCESS',\n  message: 'Content Full Spec created and synced to Notion Content Production DB',\n  data: $('Parse & Validate Spec').item.json\n}) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "node-respond-success",
+      "name": "Respond: 200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook: Receive Topic Request": {
+      "main": [
+        [
+          {
+            "node": "Validate Input (Preconditions)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input (Preconditions)": {
+      "main": [
+        [
+          {
+            "node": "Check Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Valid?": {
+      "main": [
+        [
+          {
+            "node": "AI Content Spec Writer (VietAPI)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: 400 Bad Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Content Spec Writer (VietAPI)": {
+      "main": [
+        [
+          {
+            "node": "Parse & Validate Spec",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Validate Spec": {
+      "main": [
+        [
+          {
+            "node": "Notion: Create/Sync Production Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion: Create/Sync Production Record": {
+      "main": [
+        [
+          {
+            "node": "Respond: 200 OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "content_id": "IG-260822-FOCUS",
+  "topic": "Tại sao coach càng có nhiều khách thì càng mất thời gian làm chuyên môn",
+  "platform": "Instagram",
+  "format": "Carousel",
+  "framework_bucket": "40_Pain",
+  "hook": "Lịch hẹn của bạn kín tuần. Nhưng 4 tiếng mỗi ngày lại trôi qua với việc trả lời tin nhắn và xếp lịch thủ công.",
+  "caption": "Bạn bắt đầu hành trình coaching để tạo ra tác động thật sự cho khách hàng. Nhưng khi việc kinh doanh phát triển, thời gian dành cho chuyên môn lại bị thu hẹp bởi hàng chục tác vụ vận hành hậu trường.\n\nSự quá tải này không đến từ việc bạn thiếu nỗ lực. Nó đến từ việc bạn đang mang trên vai quá nhiều vai trò cùng lúc mà chưa có một hệ thống tự động gánh đỡ.\n\nMột quy trình vận hành tinh gọn sẽ trả lại sự tĩnh lặng và năng lượng để bạn tập trung hoàn toàn vào thế mạnh cốt lõi của mình.\n\nDM \"SYSTEM\" để nhận bản phân tích quy trình tinh gọn dành riêng cho coach.",
+  "cta": "Lưu bài viết này. DM \"SYSTEM\" để nhận bản phân tích quy trình vận hành.",
+  "dm_keyword": "SYSTEM",
+  "storyboard": [
+    {
+      "slide_or_frame": 1,
+      "headline": "Càng nhiều khách, càng ít thời gian làm chuyên môn.",
+      "subtext": "Nghịch lý vận hành của một solo coach khi bắt đầu tăng trưởng.",
+      "visual_notes": "Cover slide: Nền Deep Ocean (#0B1B3D), chữ headline nổi bật với font Barber Fill, bố cục tối giản, góc trên có tag 'OPERATIONS INSIGHT'.",
+      "colors": "#0B1B3D + #F4F5F7 + #EDE0C8",
+      "fonts": "Barber Fill (Headline), Montserrat (Tag), DM Sans (Subtext)"
+    },
+    {
+      "slide_or_frame": 2,
+      "headline": "4 tiếng mỗi ngày biến mất vào đâu?",
+      "subtext": "- Trả lời các câu hỏi lặp đi lặp lại trong DM\n- Dò lịch và gửi link thủ công\n- Nhắc thanh toán và xuất hóa đơn",
+      "visual_notes": "Slide phân tích: Nền Pearl White (#F4F5F7), danh sách 3 gạch đầu dòng căn chỉnh thẳng hàng, có thanh divider Warm Champagne.",
+      "colors": "#F4F5F7 + #0B1B3D",
+      "fonts": "Montserrat (Headline), DM Sans (Body)"
+    },
+    {
+      "slide_or_frame": 3,
+      "headline": "Bạn đang trả phí đắt nhất bằng năng lượng của mình.",
+      "subtext": "Khi tâm trí bị phân mảnh bởi hàng chục tác vụ vụn vặt, chất lượng phiên coaching và năng lực sáng tạo bắt đầu giảm sút.",
+      "visual_notes": "Slide chuyển tiếp cảm xúc: Tone trầm tĩnh, khoảng trắng lớn tạo không gian thở.",
+      "colors": "#0B1B3D + #EDE0C8",
+      "fonts": "Barber Fill (Headline), DM Sans (Body)"
+    },
+    {
+      "slide_or_frame": 4,
+      "headline": "Giải pháp không phải là làm việc nhiều giờ hơn.",
+      "subtext": "Bạn cần một hệ sinh thái hậu trường tự vận hành: Tự động hóa onboarding, đồng bộ lịch trên Notion và thanh toán liền mạch.",
+      "visual_notes": "Slide giải pháp hệ thống: Biểu đồ đơn giản 3 bước tinh gọn nối nhau bằng đường kẻ thanh mảnh.",
+      "colors": "#F4F5F7 + #0B1B3D + #EDE0C8",
+      "fonts": "Montserrat (Headline), DM Sans (Body)"
+    },
+    {
+      "slide_or_frame": 5,
+      "headline": "Đứng vững trong vùng chuyên môn của bạn.",
+      "subtext": "Hệ thống thay bạn xử lý sự hỗn loạn. Bạn giữ lại sự bình an và trọn vẹn cho khách hàng.",
+      "visual_notes": "Closing CTA Slide: Nền Deep Ocean (#0B1B3D), nút CTA Warm Champagne viền nổi bật. DM 'SYSTEM'.",
+      "colors": "#0B1B3D + #EDE0C8 + #F4F5F7",
+      "fonts": "Barber Fill (Headline), Montserrat (CTA button)"
+    }
+  ],
+  "visual_direction": {
+    "concept": "Phong cách tối giản, điềm đạm, tập trung vào không gian làm việc tĩnh lặng (bàn làm việc gỗ sẫm, cuốn sổ da, tách trà, góc làm việc không lộn xộn). Không dùng ảnh chân dung AI.",
+    "reference_search_links": [
+      "https://www.pexels.com/search/minimalist%20workspace%20desk/",
+      "https://www.pexels.com/search/hands%20writing%20notebook%20calm/"
+    ],
+    "color_palette": [
+      "#0B1B3D (Deep Ocean)",
+      "#F4F5F7 (Pearl White)",
+      "#EDE0C8 (Warm Champagne)"
+    ],
+    "typography_spec": "Headline: Barber Fill | Subhead/Tag: Montserrat | Body text: DM Sans"
+  },
+  "qa_checklist": {
+    "honesty_check": "PASS",
+    "blacklist_check": "PASS",
+    "brand_voice_check": "PASS"
+  }
+}

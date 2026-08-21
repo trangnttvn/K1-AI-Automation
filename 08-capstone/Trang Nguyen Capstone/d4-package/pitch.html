@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capstone Pitch — All-in-One Content Operations OS (Trang Nguyen)</title>
+<!-- Google Fonts: Barber Fill (Montserrat 800/900 Display) / Montserrat / DM Sans -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+  :root { 
+    --color-primary: #0B1B3D;       /* Deep Ocean (60%) */
+    --color-primary-dark: #060F24;
+    --color-bg-light: #F4F5F7;      /* Pearl White (25%) */
+    --color-accent: #EDE0C8;        /* Warm Champagne (10%) */
+    --color-accent-dark: #8C6D37;   /* Bronze for light theme */
+    --color-secondary: #4A607A;     /* Muted Slate (4%) */
+    --color-silver: #C8CDD4;        /* Cool Silver (1%) */
+    --color-text-dark: #0F172A;
+    --color-success: #10B981;
+
+    --font-hero: 'Barber Fill', 'Montserrat', -apple-system, sans-serif;
+    --font-body: 'Montserrat', -apple-system, sans-serif;
+    --font-eyebrow: 'DM Sans', -apple-system, sans-serif;
+  }
+  
+  @font-face {
+    font-family: 'Barber Fill';
+    src: local('Barber Fill'), local('BarberFill'), local('Montserrat Black');
+    font-weight: 800 900;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { 
+    font-family: var(--font-body); 
+    background: var(--color-primary-dark); 
+    color: var(--color-text-dark); 
+    overflow: hidden;
+  }
+  
+  .slide { 
+    display: none; 
+    min-height: 100vh; 
+    padding: 5vh 7vw; 
+    background: var(--color-bg-light); 
+    position: relative; 
+  }
+  .slide.active { 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    animation: slideFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slideFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Slide 1 Dark Theme Override */
+  .slide.cover-slide {
+    background: radial-gradient(circle at top right, rgba(74, 96, 122, 0.3) 0%, rgba(11, 27, 61, 1) 85%);
+    color: var(--color-bg-light);
+  }
+  .slide.cover-slide h1 { color: #FFFFFF; }
+  .slide.cover-slide .meta-sub { color: var(--color-silver); }
+  .slide.cover-slide .tagline { 
+    background: rgba(237, 224, 200, 0.1); 
+    border-left: 4px solid var(--color-accent); 
+    color: var(--color-accent); 
+  }
+
+  h1 { 
+    font-family: var(--font-hero);
+    font-size: 2.8rem; 
+    margin-bottom: 0.6rem; 
+    font-weight: 900; 
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+    color: var(--color-primary); 
+  }
+  h2 { 
+    font-family: var(--font-hero);
+    color: var(--color-primary); 
+    border-bottom: 4px solid var(--color-accent-dark); 
+    display: inline-block; 
+    padding-bottom: 0.25rem; 
+    margin-bottom: 1.2rem; 
+    font-size: 1.95rem; 
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+  .kicker { 
+    font-family: var(--font-eyebrow);
+    color: var(--color-accent-dark); 
+    font-weight: 700; 
+    letter-spacing: 0.15em; 
+    text-transform: uppercase; 
+    font-size: 0.82rem; 
+    margin-bottom: 0.5rem; 
+  }
+  .slide.cover-slide .kicker { color: var(--color-accent); }
+
+  .meta-sub { 
+    font-family: var(--font-body);
+    color: #475569; 
+    font-size: 1rem; 
+    margin-bottom: 1.2rem; 
+    line-height: 1.5;
+  }
+  .tagline { 
+    font-family: var(--font-body);
+    font-size: 1.15rem; 
+    font-weight: 600; 
+    color: var(--color-primary); 
+    background: rgba(237, 224, 200, 0.4); 
+    padding: 12px 16px; 
+    border-left: 4px solid var(--color-primary); 
+    border-radius: 6px; 
+    margin-top: 0.8rem; 
+    max-width: 920px; 
+    line-height: 1.5;
+  }
+  ul { 
+    line-height: 1.75; 
+    font-size: 1rem; 
+    margin-left: 1.5rem; 
+    margin-bottom: 1.2rem; 
+  }
+  li { margin-bottom: 0.4rem; }
+
+  /* 5-Stage Pipeline Banner */
+  .pipeline-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 1rem 0;
+  }
+  .module-box {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+  }
+  .module-box .m-badge {
+    font-family: var(--font-eyebrow);
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    background: var(--color-primary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+  .module-box h4 {
+    font-family: var(--font-hero);
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    margin-bottom: 3px;
+  }
+  .module-box p {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    color: #64748B;
+    line-height: 1.35;
+  }
+
+  table { 
+    border-collapse: collapse; 
+    width: 100%; 
+    font-size: 0.9rem; 
+    margin-top: 0.8rem; 
+    background: #fff; 
+    border-radius: 8px; 
+    overflow: hidden; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+  }
+  th, td { border: 1px solid #E2E8F0; padding: 0.55rem 0.8rem; text-align: left; }
+  th { background: var(--color-primary); color: #fff; font-weight: 700; font-family: var(--font-hero); font-size: 0.82rem; letter-spacing: 0.5px; }
+  
+  .badge-pass { 
+    background: #DCFCE7; 
+    color: #166534; 
+    font-weight: 700; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-size: 0.78rem; 
+    font-family: var(--font-eyebrow);
+  }
+  .demo-box { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 16px; 
+    margin-top: 0.8rem; 
+  }
+  .demo-card { 
+    background: #fff; 
+    border: 1px solid #CBD5E1; 
+    border-radius: 8px; 
+    padding: 16px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+  }
+  .demo-card h3 { 
+    font-family: var(--font-hero);
+    color: var(--color-primary); 
+    font-size: 1rem; 
+    font-weight: 800;
+    margin-bottom: 6px; 
+  }
+  .demo-card p { font-size: 0.86rem; color: #475569; line-height: 1.5; }
+  .code-pill { 
+    font-family: monospace; 
+    background: var(--color-primary-dark); 
+    color: #38BDF8; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-size: 0.75rem; 
+  }
+
+  .footer { 
+    position: fixed; 
+    bottom: 1rem; 
+    right: 2rem; 
+    color: #94A3B8; 
+    font-size: 0.8rem; 
+    font-weight: 700; 
+    font-family: var(--font-eyebrow);
+    z-index: 10; 
+  }
+  .hint { 
+    position: fixed; 
+    bottom: 1rem; 
+    left: 2rem; 
+    color: #94A3B8; 
+    font-size: 0.8rem; 
+    font-family: var(--font-eyebrow);
+    z-index: 10; 
+  }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Cover -->
+<section class="slide cover-slide active" id="s1">
+  <p class="kicker">Đồ Án Tốt Nghiệp · AI Automation K1</p>
+  <h1>Content Operations Command OS</h1>
+  <p class="meta-sub"><strong>Học viên:</strong> Trang Nguyen · All-in-One Business Partner for Coaches & Healers<br><strong>Kiến trúc:</strong> 4 Modules E2E + Notion Database Hub (SSOT) + Analytics Feedback Loop<br><strong>Ngày nghiệm thu:</strong> 2026-08-21</p>
+  
+  <div class="tagline">
+    Chuyển hóa 60 giờ làm tay mỗi tháng thành 1 hệ thống tự động hóa khép kín: Agent Skill · n8n E2E Pipeline · Notion Database SSOT · Vibe Coding MVP Web App · Đánh giá hiệu quả tuần.
+  </div>
+</section>
+
+<!-- SLIDE 2: Bài toán thực tế -->
+<section class="slide" id="s2">
+  <h2>1 · Bài Toán Vận Hành & Khung Notion Database SSOT</h2>
+  <ul>
+    <li><strong>Thực trạng & Điểm nghẽn:</strong> Trang mất 60h/tháng cho các tác vụ lặp (bóc tách nỗi đau khách hàng, căn chỉnh màu font, soạn layout thủ công).</li>
+    <li><strong>Notion làm Trung tâm Dữ liệu duy nhất (SSOT Hub):</strong>
+      <br>• <code>Notion DB 1 (2daaa695)</code>: Lưu trữ toàn bộ <strong>Research Signals</strong> (Khử PII, gắn mã <code>SIG-xx</code>).
+      <br>• <code>Notion DB 2 (cf3ea4bf)</code>: Lưu trữ <strong>Weekly Editorial Calendar</strong> (3 đề xuất tuần cân bằng tỷ lệ 40-30-20-10).
+      <br>• <code>Notion DB 3 (87576ad4)</code>: Quản lý <strong>Full Content Specs</strong> theo từng <code>Content ID</code> (Kịch bản 5 slide tiếng Anh, Design Approval, Meta Post ID).
+    </li>
+    <li><strong>Kiểm soát chất lượng nghiêm ngặt:</strong> 6 Quality Gates đảm bảo 100% tiếng Anh chuẩn nhận diện, 0 từ cấm và 0 bịa đặt số liệu.</li>
+  </ul>
+</section>
+
+<!-- SLIDE 3: Kiến trúc 4 Module khép kín & Tài nguyên tái sử dụng -->
+<section class="slide" id="s3">
+  <h2>2 · Kiến Trúc 4 Module E2E & Kế Thừa Tài Nguyên</h2>
+  
+  <div class="pipeline-strip">
+    <div class="module-box">
+      <span class="m-badge">M0</span>
+      <h4>Intake Signals</h4>
+      <p>Apify FB + Telegram OCR ➔ Khử PII ➔ Notion <code>2daaa695</code>.</p>
+    </div>
+    <div class="module-box">
+      <span class="m-badge">M1</span>
+      <h4>Planning</h4>
+      <p>Dept-Content cân bằng 40-30-20-10 ➔ Notion <code>cf3ea4bf</code>.</p>
+    </div>
+    <div class="module-box">
+      <span class="m-badge">M2</span>
+      <h4>Spec Writer</h4>
+      <p>Skill D1 + n8n D2 sinh 5 Slide (English) ➔ Notion <code>87576ad4</code>.</p>
+    </div>
+    <div class="module-box">
+      <span class="m-badge">M3</span>
+      <h4>Distribution</h4>
+      <p>Render 1080x1350 + Chốt chặn HITL ➔ Meta Graph API.</p>
+    </div>
+    <div class="module-box">
+      <span class="m-badge">M4</span>
+      <h4>Feedback Loop</h4>
+      <p>Meta Insights ➔ Đánh giá Content ID ➔ Tối ưu tuần tới.</p>
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Nguồn mượn</th><th>Tài nguyên kế thừa</th><th>Ứng dụng thực tế trong đồ án</th></tr>
+    <tr><td><strong>Buổi 1 & BPS</strong></td><td><code>Customer_Contexts/trang_nguyen/brand_profile.json</code></td><td>Knowledge Base về bảng màu <code>#0B1B3D</code>, font <code>Barber Fill</code>, 6 Quality Gates.</td></tr>
+    <tr><td><strong>Buổi 4 (B4)</strong></td><td><code>04-contract-review/checkpoints/n8n-contract-review.json</code></td><td>Khung Webhook nhận yêu cầu on-demand, Code validation bẫy lỗi và Respond 400.</td></tr>
+    <tr><td><strong>Buổi 6 (B6)</strong></td><td><code>06-content-engine/luong-nghiep-vu.md</code></td><td>Cấu trúc phân rã: Hook tương phản ➔ Storyboard 5 slide ➔ Visual Direction.</td></tr>
+    <tr><td><strong>Buổi 7 (B7)</strong></td><td><code>07-ai-video/build/n8n/ig-static-pipeline-v2.json</code></td><td>Khung kết nối Notion DB <code>87576ad4...</code> và chốt chặn duyệt HITL trước khi publish.</td></tr>
+  </table>
+</section>
+
+<!-- SLIDE 4: Minh chứng Demo thực tế -->
+<section class="slide" id="s4">
+  <h2>3 · Minh Chứng Demo Thực Tế (D1 · D2 · D3 Web App)</h2>
+  <div class="demo-box">
+    <div class="demo-card">
+      <h3>⚡ Agent Skill D1 & n8n E2E Pipeline (D2)</h3>
+      <p>• <strong>Agent Skill:</strong> Đóng gói <code>content-spec-writer</code> với YAML frontmatter, 6 Quality Gates và kịch bản 5 slide tiếng Anh.<br>
+      • <strong>Workflow n8n:</strong> Đồ thị 8 node chạy qua Webhook, tự động phân luồng bẫy lỗi HTTP 400 và đồng bộ Notion DB theo từng Content ID trong <strong>1.84 giây</strong>.<br>
+      • <span class="code-pill">Execution ID: exec-20260821-002 (PASS 5/5)</span></p>
+    </div>
+    <div class="demo-card">
+      <h3>📱 Web App MVP Vibe Coding (D3)</h3>
+      <p>• <strong>Toàn diện 5 Chặng:</strong> Tích hợp Stepper điều hướng từ Intake tín hiệu, Kế hoạch tuần, Soạn Full Spec, Đăng bài Meta API đến <strong>Đánh giá hiệu quả tuần</strong>.<br>
+      • <strong>Chuẩn nhận diện:</strong> 100% Content Output tiếng Anh, Typography phân tầng <code>Barber Fill / Montserrat / DM Sans</code>, Carousel 4:5 tương tác cao cấp và chốt chặn HITL an toàn.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5: Nghiệm thu, Phân tích hiệu quả & Quản trị rủi ro -->
+<section class="slide" id="s5">
+  <h2>4 · Đánh Giá Hiệu Quả Tuần & Quản Trị Rủi Ro</h2>
+  <ul>
+    <li><strong>Vòng lặp Đánh giá & Tối ưu Workflow (Feedback Loop):</strong> Tự động kéo chỉ số Reach (14,850), Saves (+62%), DMs với từ khóa <em>"SYSTEM"</em> (48 DMs) để chấm điểm từng Content ID ➔ Tự động hiệu chỉnh tăng tỷ trọng góc nhìn Pain lên 45% cho tuần tiếp theo.</li>
+    <li><strong>Nghiệm thu Skill D1 & n8n D2:</strong> <span class="badge-pass">PASS 100% (6/6 tiêu chí & 5/5 asserts)</span>.</li>
+    <li><strong>Auto-Check Capstone:</strong> Đạt <span class="badge-pass">5/5 PASS, 0 FAIL</span> theo đúng tool tự động <code>capstone_auto_check.py</code>.</li>
+    <li><strong>Quản trị 4 rủi ro lớn:</strong> Khóa an toàn HITL chống ảo giác AI, đóng băng bảng màu chống sai nhận diện, thông báo lỗi Token Meta 60 ngày, cơ chế nhận ảnh OCR khi Facebook đổi giao diện.</li>
+  </ul>
+</section>
+
+<!-- SLIDE 6: Kế hoạch triển khai tiếp theo -->
+<section class="slide" id="s6">
+  <h2>5 · Kế Hoạch Đưa Vào Vận Hành & Thương Mại Hóa</h2>
+  <ul>
+    <li><strong>Giai đoạn 1 (Tuần 1):</strong> Đưa Web App MVP và Webhook n8n vào sản xuất 100% nội dung Instagram hàng tuần cho Trang Nguyen theo quy trình Notion SSOT.</li>
+    <li><strong>Giai đoạn 2 (Tuần 2–3):</strong> Mở rộng Agent <code>04_Repurposing</code> để tự động nhân bản bài viết Instagram đã duyệt sang bài viết chuyên sâu LinkedIn và bản tin Email.</li>
+    <li><strong>Giai đoạn 3 (Tháng tới):</strong> Đóng gói giải pháp thành gói dịch vụ <strong>Content Operations Automation</strong> thương mại hóa cho các khách hàng Coach & Healer cao cấp.</li>
+  </ul>
+  <p style="margin-top:2rem; font-size:1.25rem; color:var(--color-primary); font-weight:800; font-family:var(--font-hero);">Xin chân thành cảm ơn Giảng viên và Hội đồng thẩm định!</p>
+</section>
+
+<div class="hint">⌨️ Phím ← → hoặc click chuột để chuyển slide</div>
+<div class="footer">Trang Nguyen · Capstone K1 AI Automation</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let currentIdx = 0;
+  function showSlide(n) {
+    currentIdx = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('active', k === currentIdx));
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentIdx + 1);
+    if (e.key === 'ArrowLeft') showSlide(currentIdx - 1);
+  });
+  document.addEventListener('click', () => showSlide(currentIdx + 1));
+</script>
+</body>
+</html>

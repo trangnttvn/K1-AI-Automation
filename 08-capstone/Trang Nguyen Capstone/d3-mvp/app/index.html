@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang Nguyen — All-in-One Content Operations OS (4 Modules + Notion SSOT + Analytics Feedback)</title>
+  <meta name="description" content="Hệ thống tự động hóa vận hành nội dung 4 Modules trọn vẹn của Trang Nguyen: Intake -> Planning -> Production -> Distribution -> Analytics Feedback Loop với Notion SSOT">
+  <!-- Google Fonts: Barber Fill (Montserrat 800/900 Display) / Montserrat / DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Background Glows -->
+  <div class="glow-orb glow-top"></div>
+  <div class="glow-orb glow-bottom"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-badge">
+        <span class="badge-dot"></span>
+        <span class="badge-text">TRANG NGUYEN · BUSINESS PARTNER OS</span>
+      </div>
+      <h1 class="main-title">Content Operations Command Center</h1>
+      <p class="subtitle">Hệ sinh thái tự động hóa khép kín: Nghiên cứu thị trường ➔ Kế hoạch tuần ➔ Sản xuất Full Spec ➔ Đăng bài Meta API ➔ Phân tích hiệu quả & Tối ưu Workflow (Notion SSOT Hub).</p>
+      
+      <!-- Live Notion SSOT Status Bar -->
+      <div class="notion-ssot-bar">
+        <div class="ssot-item">
+          <span class="ssot-icon">🗄️</span>
+          <div class="ssot-meta">
+            <span class="ssot-name">Notion DB 1: Signals</span>
+            <code>2daaa695...</code>
+          </div>
+          <span class="ssot-status status-live">Live (3 Records)</span>
+        </div>
+        <div class="ssot-divider"></div>
+        <div class="ssot-item">
+          <span class="ssot-icon">📅</span>
+          <div class="ssot-meta">
+            <span class="ssot-name">Notion DB 2: Editorial</span>
+            <code>cf3ea4bf...</code>
+          </div>
+          <span class="ssot-status status-live">Live (3 Proposals)</span>
+        </div>
+        <div class="ssot-divider"></div>
+        <div class="ssot-item">
+          <span class="ssot-icon">📝</span>
+          <div class="ssot-meta">
+            <span class="ssot-name">Notion DB 3: Full Specs</span>
+            <code>87576ad4...</code>
+          </div>
+          <span class="ssot-status status-live">Live (By Content ID)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 5-Stage Pipeline Stepper Navigation -->
+  <nav class="pipeline-nav">
+    <div class="nav-container">
+      <div class="stepper-track">
+        <button type="button" class="step-tab active" data-tab="tab-m0" id="nav-step-0">
+          <div class="step-num">M0</div>
+          <div class="step-meta">
+            <span class="step-title">Intake & Research</span>
+            <span class="step-sub">Apify · Telegram OCR</span>
+          </div>
+        </button>
+
+        <div class="step-connector"></div>
+
+        <button type="button" class="step-tab" data-tab="tab-m1" id="nav-step-1">
+          <div class="step-num">M1</div>
+          <div class="step-meta">
+            <span class="step-title">Strategy & Planning</span>
+            <span class="step-sub">Dept-Content · Lịch tuần</span>
+          </div>
+        </button>
+
+        <div class="step-connector"></div>
+
+        <button type="button" class="step-tab" data-tab="tab-m2" id="nav-step-2">
+          <div class="step-num">M2</div>
+          <div class="step-meta">
+            <span class="step-title">Spec Production</span>
+            <span class="step-sub">AI Spec Writer · 6 Gates</span>
+          </div>
+        </button>
+
+        <div class="step-connector"></div>
+
+        <button type="button" class="step-tab" data-tab="tab-m3" id="nav-step-3">
+          <div class="step-num">M3</div>
+          <div class="step-meta">
+            <span class="step-title">Render & Distribution</span>
+            <span class="step-sub">HITL Gate · Meta API</span>
+          </div>
+        </button>
+
+        <div class="step-connector"></div>
+
+        <button type="button" class="step-tab" data-tab="tab-m4" id="nav-step-4">
+          <div class="step-num">M4</div>
+          <div class="step-meta">
+            <span class="step-title">Analytics & Feedback</span>
+            <span class="step-sub">Đánh giá & Tối ưu</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="app-container">
+    
+    <!-- ========================================================================= -->
+    <!-- MODULE 0: INTAKE & RESEARCH (Apify + Newsjacking)                         -->
+    <!-- ========================================================================= -->
+    <section class="tab-panel active" id="tab-m0">
+      <div class="panel-header-main">
+        <div>
+          <span class="module-kicker">MODULE 0 · DATA INGESTION & RESEARCH</span>
+          <h2 class="module-heading">Market Research Signals & Pain Intake (Notion Hub)</h2>
+        </div>
+        <div class="header-actions">
+          <button type="button" id="btn-trigger-apify" class="btn-accent-sm">🔄 Kích hoạt Apify Crawl (FB Public)</button>
+          <button type="button" id="btn-simulate-telegram" class="btn-secondary-sm">📱 Nhận Tin Telegram OCR (Private)</button>
+        </div>
+      </div>
+
+      <div class="module-grid-2">
+        <!-- Left: Signals Stream -->
+        <div class="panel card-panel">
+          <div class="card-title-bar">
+            <h3>Research Signals Database (Notion DB: <code>2daaa695...</code>)</h3>
+            <span class="badge-count" id="m0-signal-count">3 Signals Ingested</span>
+          </div>
+          <p class="panel-intro-text">Tự động khử PII (xóa SĐT/Email), phân loại vào 6 Core Bottlenecks và tự động gán Signal ID vào Notion.</p>
+          
+          <div class="signal-list" id="signal-list-container">
+            <!-- Signal Card 1 -->
+            <div class="signal-item active" data-signal-id="SIG-01">
+              <div class="signal-item-top">
+                <span class="badge-tag tag-pain">Mindset & Burnout</span>
+                <span class="notion-record-id">Notion ID: <code>SIG-01</code></span>
+              </div>
+              <h4 class="signal-headline">"Losing 4 hours every day on repetitive manual scheduling and DMs"</h4>
+              <p class="signal-quote">"My coaching roster is completely booked, but I spend half my day answering back-and-forth messages just to find a meeting slot and send Zoom links."</p>
+              <div class="signal-footer">
+                <span class="tavily-bridge">🔗 Tavily: <em>"Executive coaching burnout calendar automation trends"</em></span>
+                <button type="button" class="btn-select-signal" data-signal-idx="0">Select Signal →</button>
+              </div>
+            </div>
+
+            <!-- Signal Card 2 -->
+            <div class="signal-item" data-signal-id="SIG-02">
+              <div class="signal-item-top">
+                <span class="badge-tag tag-system">Business Setup</span>
+                <span class="notion-record-id">Notion ID: <code>SIG-02</code></span>
+              </div>
+              <h4 class="signal-headline">"Clients missing appointments, scattered contract documents"</h4>
+              <p class="signal-quote">"Clients constantly forget their session times or send payments via random apps. I waste an hour searching through message threads."</p>
+              <div class="signal-footer">
+                <span class="tavily-bridge">🔗 Tavily: <em>"High-ticket client onboarding automation workflows"</em></span>
+                <button type="button" class="btn-select-signal" data-signal-idx="1">Select Signal →</button>
+              </div>
+            </div>
+
+            <!-- Signal Card 3 -->
+            <div class="signal-item" data-signal-id="SIG-03">
+              <div class="signal-item-top">
+                <span class="badge-tag tag-proof">Growth & Money</span>
+                <span class="notion-record-id">Notion ID: <code>SIG-03</code></span>
+              </div>
+              <h4 class="signal-headline">"Fear of launching group coaching due to operational collapse"</h4>
+              <p class="signal-quote">"1-on-1 coaching is already overwhelming. If I scale to a group of 20 people, I will drown in manual homework check-ins."</p>
+              <div class="signal-footer">
+                <span class="tavily-bridge">🔗 Tavily: <em>"Group coaching backend scalable automation systems"</em></span>
+                <button type="button" class="btn-select-signal" data-signal-idx="2">Select Signal →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Signal Detail & Quick Bridge -->
+        <div class="panel card-panel">
+          <div class="card-title-bar">
+            <h3>Signal Details & Trang Nguyen Service Bridge</h3>
+          </div>
+          <div id="m0-detail-view" class="detail-box-clean">
+            <div class="info-row">
+              <span class="info-label">Signal ID (Notion Primary Key):</span>
+              <strong id="m0-cur-id" class="code-pill" style="font-size: 0.95rem;">SIG-01</strong>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Selected Signal Topic:</span>
+              <strong id="m0-cur-title" class="info-val">Losing 4 hours every day on repetitive manual scheduling and DMs</strong>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Customer Quote (Verbatim):</span>
+              <p id="m0-cur-quote" class="quote-box">"My coaching roster is completely booked, but I spend half my day answering back-and-forth messages just to find a meeting slot and send Zoom links. I have zero mental bandwidth left for actual client delivery."</p>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Service Bridge Solution:</span>
+              <span id="m0-cur-bridge" class="badge-service">Automated Onboarding & Notion Smart Calendar Sync</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Notion Sync Status:</span>
+              <span class="badge-status status-approved">Synced to Notion Research Signals (Status: Approved)</span>
+            </div>
+
+            <div class="action-card-footer">
+              <button type="button" id="btn-push-to-m1" class="btn-primary">
+                🚀 Chuyển Tín Hiệu Sang Module 1 (Lập Kế Hoạch Tuần) →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 1: STRATEGY & PLANNING (Dept-Content)                              -->
+    <!-- ========================================================================= -->
+    <section class="tab-panel" id="tab-m1">
+      <div class="panel-header-main">
+        <div>
+          <span class="module-kicker">MODULE 1 · STRATEGY & PLANNING (DEPT-CONTENT)</span>
+          <h2 class="module-heading">Weekly Content Proposals & Pillar Balancing (Notion DB)</h2>
+        </div>
+        <div class="header-actions">
+          <button type="button" id="btn-run-planner" class="btn-accent-sm">⚡ Chạy AI Planner (8h Sáng Thứ Hai)</button>
+        </div>
+      </div>
+
+      <!-- Pillar Allocation Bar -->
+      <div class="pillar-summary-box panel">
+        <div class="pillar-header">
+          <span class="pillar-title">4 CONTENT PILLARS ALLOCATION (BRAND PROFILE)</span>
+          <span class="pillar-rule">Ratio: 40% Pain · 30% System · 20% Proof · 10% Brand</span>
+        </div>
+        <div class="pillar-progress-bar">
+          <div class="bar-segment bar-pain" style="width: 40%;" title="40% Pain & Problem">40% Pain</div>
+          <div class="bar-segment bar-sys" style="width: 30%;" title="30% Systems & Education">30% System</div>
+          <div class="bar-segment bar-proof" style="width: 20%;" title="20% Proof & Results">20% Proof</div>
+          <div class="bar-segment bar-brand" style="width: 10%;" title="10% Brand & Personal">10% Brand</div>
+        </div>
+      </div>
+
+      <!-- Proposals List -->
+      <div class="panel card-panel" style="margin-top: 20px;">
+        <div class="card-title-bar">
+          <h3>Weekly Editorial Calendar (Notion DB: <code>cf3ea4bf...</code>)</h3>
+          <span class="badge-count">3 Ready Proposals</span>
+        </div>
+
+        <div class="proposals-grid" id="proposals-container">
+          <!-- Proposal 1 -->
+          <div class="proposal-card active">
+            <div class="proposal-top">
+              <span class="badge-tag tag-pain">40_Pain</span>
+              <span class="code-pill">ID: PROP-WK34-01</span>
+            </div>
+            <h4 class="prop-title">Why having more clients leads to less time for actual coaching</h4>
+            <p class="prop-desc">Deconstruct the 3 operational bottlenecks draining coaching energy and show how to delegate them to Notion Business OS.</p>
+            <div class="prop-meta">
+              <span>Format: Carousel (5 Slides)</span>
+              <span class="badge-status status-approved">Notion: Approved</span>
+            </div>
+            <button type="button" class="btn-select-proposal" data-prop-idx="0">⚡ Soạn Full Spec (Sang Module 2) →</button>
+          </div>
+
+          <!-- Proposal 2 -->
+          <div class="proposal-card">
+            <div class="proposal-top">
+              <span class="badge-tag tag-system">30_System</span>
+              <span class="code-pill">ID: PROP-WK34-02</span>
+            </div>
+            <h4 class="prop-title">Systems exist not to work more — but to remember less</h4>
+            <p class="prop-desc">Minimalist calm operations quote derived from 10 years in enterprise banking systems architecture.</p>
+            <div class="prop-meta">
+              <span>Format: Static (1080x1350)</span>
+              <span class="badge-status status-approved">Notion: Approved</span>
+            </div>
+            <button type="button" class="btn-select-proposal" data-prop-idx="1">⚡ Soạn Full Spec (Sang Module 2) →</button>
+          </div>
+
+          <!-- Proposal 3 -->
+          <div class="proposal-card">
+            <div class="proposal-top">
+              <span class="badge-tag tag-proof">20_Proof</span>
+              <span class="code-pill">ID: PROP-WK34-03</span>
+            </div>
+            <h4 class="prop-title">Behind the scenes: Scaling 1,000+ orders/month with only 3 people</h4>
+            <p class="prop-desc">Proof of lean operational efficiency without team bloat using standardized 7-Module Notion architecture.</p>
+            <div class="prop-meta">
+              <span>Format: Reel Script (30s)</span>
+              <span class="badge-status status-approved">Notion: Approved</span>
+            </div>
+            <button type="button" class="btn-select-proposal" data-prop-idx="2">⚡ Soạn Full Spec (Sang Module 2) →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 2: CONTENT SPEC PRODUCTION (Agent Skill D1 + n8n D2)              -->
+    <!-- ========================================================================= -->
+    <section class="tab-panel" id="tab-m2">
+      <div class="panel-header-main">
+        <div>
+          <span class="module-kicker">MODULE 2 · SPEC PRODUCTION (CORE ENGINE)</span>
+          <h2 class="module-heading">Detailed Spec Writer & 5-Slide Storyboard (English)</h2>
+        </div>
+        <div class="header-actions">
+          <button type="button" id="btn-preset-happy" class="btn-accent-sm">✨ Nạp Mẫu TC-1</button>
+          <button type="button" id="btn-preset-bad" class="btn-secondary-sm">⚠️ Mẫu Lỗi TC-2</button>
+        </div>
+      </div>
+
+      <div class="module-grid-2">
+        <!-- Left: Form -->
+        <div class="panel card-panel">
+          <div class="notion-record-banner">
+            <span>🗂️ Target Notion Database: <code>87576ad4...</code></span>
+            <span class="badge-tag tag-system" id="m2-content-id-badge">ID: IG-260821-FOCUS</span>
+          </div>
+
+          <form id="form-spec" onsubmit="return false;">
+            <div class="form-group">
+              <label for="input-topic" class="form-label">Topic / Core Angle (English) <span class="req">*</span></label>
+              <input type="text" id="input-topic" class="form-input" placeholder="e.g. Why having more clients leads to less time for actual coaching..." autocomplete="off">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-6">
+                <label for="select-format" class="form-label">Format <span class="req">*</span></label>
+                <select id="select-format" class="form-select">
+                  <option value="Carousel">Carousel (1080x1350 - 5 Slides)</option>
+                  <option value="Static">Static Single (1080x1350)</option>
+                  <option value="Reel">Reel Script (1080x1920 - 30s)</option>
+                  <option value="Story">IG Story (1080x1920)</option>
+                </select>
+              </div>
+
+              <div class="form-group col-6">
+                <label for="select-pillar" class="form-label">Pillar Bucket <span class="req">*</span></label>
+                <select id="select-pillar" class="form-select">
+                  <option value="40_Pain">40% Pain & Problem</option>
+                  <option value="30_System">30% Systems & Education</option>
+                  <option value="20_Proof">20% Proof & Results</option>
+                  <option value="10_Trang">10% Brand & Personal</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="input-insight" class="form-label">Market Insight / Customer Voice</label>
+              <textarea id="input-insight" class="form-textarea" rows="3" placeholder="Verbatim voice of customer extracted from research..."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" id="btn-generate" class="btn-primary">
+                ⚡ Tạo Full Spec & Đồng Bộ Notion (D1/D2)
+              </button>
+            </div>
+
+            <div id="form-alert" class="alert-box hidden"></div>
+          </form>
+
+          <!-- 6 Quality Gates Live Monitor -->
+          <div class="quality-gates-box">
+            <h3 class="gates-title">6 Quality Gates Live Monitor (Dept_Content Standard)</h3>
+            <div class="gates-grid">
+              <div class="gate-item" id="gate-color">
+                <span class="gate-icon">🎨</span>
+                <span class="gate-name">Palette (#0B1B3D)</span>
+                <span class="gate-status status-pending">READY</span>
+              </div>
+              <div class="gate-item" id="gate-typo">
+                <span class="gate-icon">🔤</span>
+                <span class="gate-name">Barber Fill Font</span>
+                <span class="gate-status status-pending">READY</span>
+              </div>
+              <div class="gate-item" id="gate-blacklist">
+                <span class="gate-icon">🚫</span>
+                <span class="gate-name">0 Blacklist Words</span>
+                <span class="gate-status status-pending">READY</span>
+              </div>
+              <div class="gate-item" id="gate-cta">
+                <span class="gate-icon">🎯</span>
+                <span class="gate-name">CTA Alignment</span>
+                <span class="gate-status status-pending">READY</span>
+              </div>
+              <div class="gate-item" id="gate-voice">
+                <span class="gate-icon">🗣️</span>
+                <span class="gate-name">Calm & Concise</span>
+                <span class="gate-status status-pending">READY</span>
+              </div>
+              <div class="gate-item" id="gate-honesty">
+                <span class="gate-icon">🔍</span>
+                <span class="gate-name">Honesty & Proof</span>
+                <span class="gate-status status-pending">READY</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Interactive Carousel & Spec -->
+        <div class="panel card-panel">
+          <div class="card-title-bar">
+            <h3>5-Slide Storyboard & Visual Output (English)</h3>
+            <div>
+              <button type="button" id="btn-copy-json" class="btn-secondary-sm">📋 Copy JSON</button>
+              <button type="button" id="btn-push-to-m3" class="btn-accent-sm">Chuyển sang Module 3 (Render & Publish) →</button>
+            </div>
+          </div>
+
+          <div id="output-empty" class="empty-state">
+            <div class="empty-icon">✨</div>
+            <h3 class="empty-title">No Spec Generated Yet</h3>
+            <p class="empty-desc">Click <strong>"Nạp Mẫu TC-1"</strong> or enter a topic and click <strong>"Tạo Full Spec"</strong>.</p>
+          </div>
+
+          <div id="output-content" class="output-content hidden">
+            <!-- Hook -->
+            <div class="hook-card">
+              <div style="display:flex; justify-content:space-between;">
+                <span class="card-tag">VISCERAL-PARALLEL HOOK</span>
+                <span class="code-pill" id="out-content-id">ID: IG-260821-FOCUS</span>
+              </div>
+              <p id="out-hook-text" class="hook-text"></p>
+            </div>
+
+            <!-- Slide Viewer -->
+            <div class="carousel-section">
+              <div class="carousel-header">
+                <span class="carousel-label">STORYBOARD CAROUSEL 4:5</span>
+                <span id="slide-counter" class="slide-counter">Slide 1 / 5</span>
+              </div>
+
+              <div class="slide-stage">
+                <div class="slide-card" id="active-slide-card">
+                  <div class="slide-top-bar">
+                    <span id="slide-tag" class="slide-tag">TRANG NGUYEN · SYSTEMS</span>
+                    <span id="slide-number-badge" class="slide-badge">01</span>
+                  </div>
+                  <div class="slide-body">
+                    <h3 id="slide-headline" class="slide-headline"></h3>
+                    <p id="slide-subtext" class="slide-subtext"></p>
+                  </div>
+                  <div class="slide-footer">
+                    <span id="slide-visual-notes" class="visual-note"></span>
+                    <span class="slide-swipe-hint">Swipe →</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="carousel-nav">
+                <button type="button" id="btn-slide-prev" class="btn-nav">← Previous</button>
+                <div id="carousel-dots" class="carousel-dots">
+                  <span class="dot active" data-index="0"></span>
+                  <span class="dot" data-index="1"></span>
+                  <span class="dot" data-index="2"></span>
+                  <span class="dot" data-index="3"></span>
+                  <span class="dot" data-index="4"></span>
+                </div>
+                <button type="button" id="btn-slide-next" class="btn-nav">Next →</button>
+              </div>
+            </div>
+
+            <!-- Details -->
+            <div class="details-grid">
+              <div class="detail-box">
+                <div class="detail-header">
+                  <span class="detail-title">Instagram Caption (<span id="caption-word-count">104</span> words)</span>
+                  <span class="badge-dm">DM: <strong id="out-dm-keyword">SYSTEM</strong></span>
+                </div>
+                <p id="out-caption" class="caption-text"></p>
+                <div class="cta-box">
+                  <strong>CTA:</strong> <span id="out-cta"></span>
+                </div>
+              </div>
+
+              <div class="detail-box">
+                <div class="detail-header">
+                  <span class="detail-title">Visual Direction & Pexels Search URLs</span>
+                </div>
+                <div class="visual-concept">
+                  <strong>Concept:</strong> <span id="out-visual-concept"></span>
+                </div>
+                <ul id="out-pexels-list" class="pexels-links"></ul>
+              </div>
+            </div>
+
+            <!-- JSON Viewer -->
+            <div class="raw-json-box">
+              <details>
+                <summary class="json-summary">🔍 View Full Spec JSON Schema (Notion Payload)</summary>
+                <pre><code id="json-viewer"></code></pre>
+              </details>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 3: VISUAL RENDER & DISTRIBUTION (HITL Gate + Meta API)             -->
+    <!-- ========================================================================= -->
+    <section class="tab-panel" id="tab-m3">
+      <div class="panel-header-main">
+        <div>
+          <span class="module-kicker">MODULE 3 · RENDER & DISTRIBUTION (IG GRAPH API)</span>
+          <h2 class="module-heading">Visual Render Mockup, HITL Review & Meta API Publishing</h2>
+        </div>
+        <div class="header-actions">
+          <button type="button" id="btn-render-preview" class="btn-accent-sm">🎨 Render Mockup HTML/CSS (Puppeteer)</button>
+        </div>
+      </div>
+
+      <div class="module-grid-2">
+        <!-- Left: Render Mockup Card -->
+        <div class="panel card-panel">
+          <div class="card-title-bar">
+            <h3>Automated Visual Layout (1080×1350 Portrait)</h3>
+            <span class="badge-status status-approved" id="m3-render-status">Render: Ready</span>
+          </div>
+
+          <div class="render-preview-wrapper">
+            <div class="instagram-frame" id="ig-render-frame">
+              <div class="ig-post-top">
+                <div class="ig-avatar"></div>
+                <div class="ig-user-meta">
+                  <strong>trangnguyen.partner</strong>
+                  <span>Instagram Business · Sponsored</span>
+                </div>
+                <span class="ig-more">•••</span>
+              </div>
+
+              <!-- Rendered Visual Area -->
+              <div class="ig-visual-box" id="ig-visual-box">
+                <div class="rendered-canvas" id="rendered-canvas">
+                  <div class="rc-label">TRANG NGUYEN · SYSTEMS BEFORE MARKETING</div>
+                  <div class="rc-hero" id="rc-hero-text">FREEDOM</div>
+                  <div class="rc-sub" id="rc-sub-text">isn't fewer clients — it's fewer things to remember.</div>
+                  <div class="rc-badge-bottom">SWIPE TO READ ➔</div>
+                </div>
+              </div>
+
+              <div class="ig-post-bottom">
+                <div class="ig-actions-bar">
+                  <span>❤️ 💬 ↗️</span>
+                  <span>🔖</span>
+                </div>
+                <div class="ig-caption-preview">
+                  <strong>trangnguyen.partner</strong> <span id="m3-caption-preview">Your calendar is booked solid. But 4 hours of every day are lost in repetitive DMs and manual scheduling...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Human-In-The-Loop Approval Gate -->
+        <div class="panel card-panel">
+          <div class="card-title-bar">
+            <h3>Human-in-the-Loop Approval & Notion Sync Gate</h3>
+          </div>
+          <p class="panel-intro-text">Data Contract Rule: n8n will only trigger publication to Meta Graph API after Trang explicitly confirms approval in Notion Property <code>Design approval</code>.</p>
+
+          <div class="gate-control-card">
+            <div class="gate-field">
+              <label class="form-label">Notion Content Record ID:</label>
+              <div class="code-pill" style="display:inline-block; margin-bottom: 8px;">IG-260821-FOCUS</div>
+            </div>
+
+            <div class="gate-field">
+              <label class="form-label">Review Status (Notion Property: <code>Design approval</code>):</label>
+              <select id="m3-approval-select" class="form-select gate-select">
+                <option value="Pending">⏳ Pending (Awaiting Trang's Review)</option>
+                <option value="Approved">✅ Approved (Authorize Immediate Publishing)</option>
+                <option value="Changes_Requested">⚠️ Changes Requested (Send back to Module 2)</option>
+              </select>
+            </div>
+
+            <div class="gate-field" style="margin-top: 14px;">
+              <label class="form-label">Target Distribution Channels:</label>
+              <div class="channel-pills">
+                <span class="pill active">📷 Instagram Feed</span>
+                <span class="pill active">📘 Facebook Page</span>
+                <span class="pill">💼 LinkedIn Article</span>
+              </div>
+            </div>
+
+            <div class="publish-action-box">
+              <button type="button" id="btn-publish-meta" class="btn-primary btn-publish">
+                🚀 Xuất Bản Qua Meta Business Graph API
+              </button>
+              <p id="publish-status-text" class="publish-hint">Safety Lock Active: Set status to 'Approved' to enable publishing.</p>
+            </div>
+
+            <!-- Published Log Box -->
+            <div id="m3-publish-log" class="publish-log-box hidden">
+              <h4>✅ Successfully Published to Instagram!</h4>
+              <p><strong>Post ID:</strong> <span class="code-pill">17982348923091823</span></p>
+              <p><strong>Database Record:</strong> Updated status to <code>Posted</code> on Notion DB <code>87576ad4...</code>.</p>
+              <button type="button" id="btn-push-to-m4" class="btn-accent-sm" style="margin-top:10px;">
+                📊 Xem Đánh Giá Hiệu Quả (Module 4) →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 4: WEEKLY PERFORMANCE & RETROSPECTIVE ADAPTATION LOOP              -->
+    <!-- ========================================================================= -->
+    <section class="tab-panel" id="tab-m4">
+      <div class="panel-header-main">
+        <div>
+          <span class="module-kicker">MODULE 4 · PERFORMANCE & WORKFLOW ADAPTATION</span>
+          <h2 class="module-heading">Weekly Performance Evaluation & Continuous Calibration</h2>
+        </div>
+        <div class="header-actions">
+          <button type="button" id="btn-run-analytics" class="btn-accent-sm">📈 Kéo Số Liệu Meta Insights Mới Nhất</button>
+          <button type="button" id="btn-calibrate-workflow" class="btn-secondary-sm">🔄 Tự Động Hiệu Chỉnh Workflow Tuần Tới</button>
+        </div>
+      </div>
+
+      <!-- Performance KPI Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">TOTAL REACH (TUẦN NÀY)</span>
+          <div class="kpi-val">14,850</div>
+          <span class="kpi-sub positive">▲ +38.5% so với tuần trước</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">DM "SYSTEM" TRIGGERED</span>
+          <div class="kpi-val">48 DMs</div>
+          <span class="kpi-sub positive">★ Tỷ lệ chuyển đổi CTA: 4.8%</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">LƯỢT LƯU (SAVES)</span>
+          <div class="kpi-val">284 Saves</div>
+          <span class="kpi-sub positive">▲ +62% (Format Carousel 5 slide)</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">ENGAGEMENT RATE</span>
+          <div class="kpi-val">6.2%</div>
+          <span class="kpi-sub neutral">Benchmark thị trường: 2.1%</span>
+        </div>
+      </div>
+
+      <div class="module-grid-2" style="margin-top: 20px;">
+        <!-- Left: Content ID Performance Breakdown -->
+        <div class="panel card-panel">
+          <div class="card-title-bar">
+            <h3>Bảng Đánh Giá Từng Content ID Đã Đăng (Notion DB: <code>87576ad4...</code>)</h3>
+          </div>
+          
+          <table class="analytics-table">
+            <thead>
+              <tr>
+                <th>Content ID</th>
+                <th>Pillar</th>
+                <th>Reach / Saves</th>
+                <th>DMs</th>
+                <th>Performance Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>IG-260821-FOCUS</strong><br><small>Fully Booked Overwhelmed</small></td>
+                <td><span class="badge-tag tag-pain">40_Pain</span></td>
+                <td>6,420 / 142</td>
+                <td><strong>28 DMs</strong></td>
+                <td><span class="score-badge score-high">94/100 (WINNER)</span></td>
+              </tr>
+              <tr>
+                <td><strong>IG-260822-SYSTEM</strong><br><small>Systems Free Your Mind</small></td>
+                <td><span class="badge-tag tag-system">30_System</span></td>
+                <td>4,980 / 89</td>
+                <td>12 DMs</td>
+                <td><span class="score-badge score-med">86/100 (GOOD)</span></td>
+              </tr>
+              <tr>
+                <td><strong>IG-260823-SCALE</strong><br><small>1,000+ Orders 3 People</small></td>
+                <td><span class="badge-tag tag-proof">20_Proof</span></td>
+                <td>3,450 / 53</td>
+                <td>8 DMs</td>
+                <td><span class="score-badge score-med">81/100 (GOOD)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Right: AI Adaptation Engine & Calibration Feedback -->
+        <div class="panel card-panel">
+          <div class="card-title-bar">
+            <h3>AI Retrospective & Workflow Calibration Engine</h3>
+            <span class="badge-status status-approved">Status: Auto-Calibrated</span>
+          </div>
+
+          <div class="adaptation-box">
+            <h4 class="ad-title">🔍 Phát Hiện & Đề Xuất Điều Chỉnh Cho Tuần Tới:</h4>
+            <ul class="ad-list">
+              <li>
+                <strong>1. Góc nhìn chiến thắng (Winning Angle):</strong> Định dạng Carousel 5 slide về chủ đề <em>"Overwhelmed calendar"</em> tạo ra 58% tổng số DM với từ khóa "SYSTEM".
+              </li>
+              <li>
+                <strong>2. Điều chỉnh tỷ trọng Pillar (Module 1):</strong> Tăng tỷ trọng góc nhìn <strong>40% Pain (Bottlenecks)</strong> lên thành <strong>45%</strong> trong tuần kế tiếp; giảm bài tĩnh triết lý xuống 25%.
+              </li>
+              <li>
+                <strong>3. Cải tiến Hook Formula (Module 2):</strong> Cấu trúc Hook tương phản <em>"Booked solid... But lost 4 hours"</em> có thời gian đọc trung bình cao gấp 2.4 lần so với Hook trực diện.
+              </li>
+            </ul>
+
+            <div class="ad-action-box">
+              <button type="button" id="btn-apply-calibration" class="btn-primary">
+                ⚡ Áp Dụng Đề Xuất Vào Lịch Tuần Mới (Module 1) →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
