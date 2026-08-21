@@ -1,0 +1,78 @@
+{
+  "source_candidate_id": "CAND-001",
+  "criteria": [
+    {
+      "id": "sales_experience",
+      "name": "Kinh nghiệm Sales/CS có KPI",
+      "score": 20,
+      "max_points": 20,
+      "evidence": "over 15 years of experience across Corporate Banking, Fintech Infrastructure",
+      "scoring_note": "Ứng viên có 156 tháng kinh nghiệm sales, vượt mức 24 tháng."
+    },
+    {
+      "id": "b2b_experience",
+      "name": "Kinh nghiệm B2B",
+      "score": 15,
+      "max_points": 15,
+      "evidence": "Corporate Relationship Manager (B2B) | 2012 – 2016",
+      "scoring_note": "Ứng viên có 156 tháng kinh nghiệm B2B, vượt mức 24 tháng."
+    },
+    {
+      "id": "prospecting",
+      "name": "Tìm kiếm và tiếp cận khách hàng",
+      "score": 5,
+      "max_points": 15,
+      "evidence": "Market mapping",
+      "scoring_note": "Chỉ có evidence cho 1 kênh tìm kiếm (Market mapping)."
+    },
+    {
+      "id": "communication",
+      "name": "Tư vấn, giao tiếp và đàm phán",
+      "score": 12,
+      "max_points": 15,
+      "evidence": "Vietnamese (Native), English (Fluent), French (Professional)",
+      "scoring_note": "Có evidence rõ ràng về khả năng giao tiếp đa ngôn ngữ."
+    },
+    {
+      "id": "crm_pipeline",
+      "name": "CRM và quản lý pipeline",
+      "score": 10,
+      "max_points": 10,
+      "evidence": "Salesforce, HubSpot",
+      "scoring_note": "Thành thạo các hệ thống CRM phổ biến."
+    },
+    {
+      "id": "quantified_achievement",
+      "name": "Thành tích có số liệu",
+      "score": 15,
+      "max_points": 15,
+      "evidence": "scaled B2B/B2C operations from 0 to 1,000+ monthly orders",
+      "scoring_note": "Có thành tích định lượng rõ ràng."
+    },
+    {
+      "id": "market_fit",
+      "name": "Hiểu SaaS/phần mềm/giáo dục/dịch vụ B2B",
+      "score": 5,
+      "max_points": 5,
+      "evidence": "Fintech Infrastructure, Corporate Banking",
+      "scoring_note": "Kinh nghiệm phù hợp với lĩnh vực dịch vụ tài chính B2B."
+    },
+    {
+      "id": "tools_and_cv_quality",
+      "name": "Công cụ và chất lượng CV",
+      "score": 5,
+      "max_points": 5,
+      "evidence": "Notion, Google Workspace, Canva",
+      "scoring_note": "Sử dụng thành thạo nhiều công cụ làm việc (>2)."
+    }
+  ],
+  "total_score": 87,
+  "result": "STRONG_REVIEW",
+  "human_review_required": true,
+  "scoring_summary": "Ứng viên xuất sắc với 87/100 điểm, dồi dào kinh nghiệm B2B (>10 năm), kỹ năng sử dụng công cụ CRM và ngoại ngữ tốt. Cần khai thác thêm về các kênh tìm kiếm khách hàng cụ thể.",
+  "interview_questions": [
+    "Bạn có thể chia sẻ cụ thể hơn về các kênh tiếp cận khách hàng (prospecting) khác ngoài việc lập bản đồ thị trường (Market mapping) mà bạn từng sử dụng?",
+    "Với hơn 15 năm kinh nghiệm, bạn đã đối mặt với những thách thức lớn nào khi đàm phán hợp đồng B2B với các đối tác tài chính lớn?",
+    "Bạn đã áp dụng Salesforce và HubSpot như thế nào để tối ưu hóa quy trình quản lý pipeline và tăng tỷ lệ chuyển đổi?"
+  ]
+}

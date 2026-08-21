@@ -1,0 +1,36 @@
+{
+  "candidate_id": "CAND-001",
+  "candidate_name": "Mr A",
+  "full_time": true,
+  "months_sales": 156,
+  "months_b2b": 156,
+  "prospecting_channels": [
+    "Market mapping"
+  ],
+  "communication_evidence": "Vietnamese (Native), English (Fluent), French (Professional)",
+  "crm_tools": [
+    "Salesforce",
+    "HubSpot"
+  ],
+  "quantified_achievement": "scaled B2B/B2C operations from 0 to 1,000+ monthly orders",
+  "market_experience": [
+    "US",
+    "Japan",
+    "Vietnam",
+    "EU"
+  ],
+  "office_tools": [
+    "Notion",
+    "Google Workspace",
+    "Canva"
+  ],
+  "evidence_summary": "- Hơn 15 năm kinh nghiệm B2B, Banking và Fintech.\n- Từng làm Relationship Manager (B2B) tại Shinhan Bank.\n- Thành thạo Salesforce, HubSpot và Notion.\n- Thành tích mở rộng hoạt động lên 1,000+ đơn hàng/tháng.",
+  "evidence": {
+    "months_sales": "over 15 years of experience across Corporate Banking, Fintech Infrastructure",
+    "months_b2b": "Corporate Relationship Manager (B2B) | 2012 – 2016",
+    "crm_tools": "CRM (Salesforce/HubSpot)",
+    "quantified_achievement": "scaled B2B/B2C operations from 0 to 1,000+ monthly orders",
+    "market_experience": "Managed multi-market sourcing (US, Japan)",
+    "office_tools": "Systems: Notion (Relational DB Design), Google Workspace"
+  }
+}

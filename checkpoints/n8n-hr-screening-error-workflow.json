@@ -1,0 +1,85 @@
+{
+  "name": "HR Screening — Error Handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "error-trigger-node",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const errorData = $json;\nconst processedAt = new Date().toISOString();\n\nconst logEntry = {\n  run_id: errorData.execution?.id || 'error-run-' + Date.now(),\n  candidate_id: 'UNKNOWN_OR_ERROR',\n  step: 'WORKFLOW_ERROR',\n  status: 'ERROR',\n  input_ref: errorData.workflow?.name || 'HR Screening 4 Lớp',\n  output_ref: 'Run Log Tab (Error)',\n  schema_validation: 'FAIL',\n  error_code: errorData.execution?.error?.name || 'EXECUTION_ERROR',\n  error_message: errorData.execution?.error?.message || 'Workflow execution encountered an unexpected error.',\n  processed_at: processedAt\n};\n\nreturn [{ json: logEntry }];"
+      },
+      "id": "format-error-log-node",
+      "name": "Format Error Log Entry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__singleValue": true,
+          "value": "GOOGLE_SHEET_DOCUMENT_ID_PLACEHOLDER"
+        },
+        "sheetName": {
+          "__singleValue": true,
+          "value": "Run Log"
+        },
+        "options": {}
+      },
+      "id": "append-error-log-sheets-node",
+      "name": "Append Error Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        580,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets-oauth2-credential",
+          "name": "Google Sheets OAuth2 Credential"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Error Log Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Error Log Entry": {
+      "main": [
+        [
+          {
+            "node": "Append Error Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}

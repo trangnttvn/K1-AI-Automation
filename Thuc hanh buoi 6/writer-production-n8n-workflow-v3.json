@@ -1,0 +1,413 @@
+{
+  "name": "Luồng 2B: Content Production (Writer) v2 — Full Spec + Visual Links",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 12
+            }
+          ]
+        }
+      },
+      "id": "add7f5e3-3b4c-4c46-83cb-4c8e07df8742",
+      "name": "Lịch hẹn (12h trưa mỗi ngày)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "cf3ea4bf-e5d4-4cb0-96e7-432f1cea842c",
+          "mode": "id"
+        },
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Approval|status",
+              "condition": "equals",
+              "statusValue": "Done"
+            },
+            {
+              "key": "Last automation event|rich_text",
+              "condition": "does_not_contain",
+              "richTextValue": "Written"
+            }
+          ]
+        }
+      },
+      "id": "6720b8c4-ab0c-4c81-be0d-ca06b22951d7",
+      "name": "Lấy Proposal đã duyệt",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        200,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (items.length === 0) {\n  return [{ json: { count: 0 } }];\n}\nconst allPlans = [];\nconst failed = [];\n\nitems.forEach(item => {\n  const raw = item.json.property_raw_plan_json;\n  let planArr;\n  try {\n    planArr = JSON.parse(raw);\n  } catch (e) {\n    failed.push({ id: item.json.id, reason: 'Raw Plan JSON khong parse duoc', preview: String(raw || '').slice(0, 120) });\n    return;\n  }\n  if (!Array.isArray(planArr)) {\n    failed.push({ id: item.json.id, reason: 'Raw Plan JSON khong phai array' });\n    return;\n  }\n  planArr.forEach(p => {\n    p.proposal_id = item.json.id;\n    allPlans.push(p);\n  });\n});\n\nif (failed.length && allPlans.length === 0) {\n  throw new Error('Khong doc duoc proposal nao: ' + JSON.stringify(failed));\n}\n\nreturn [{ json: { count: allPlans.length, plans: allPlans, failed } }];"
+      },
+      "id": "2e4643d1-bfd1-495e-b407-80827a1de4d4",
+      "name": "Gộp & Tách Bài Viết",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.count }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "2d9c46b7-34d6-4d3e-a612-4364149020f2",
+      "name": "Kiểm tra rỗng",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        600,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "plans",
+        "options": {}
+      },
+      "id": "2eb31e56-8bc5-4a21-837f-7c3bf665992f",
+      "name": "Tách từng Bài viết",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        800,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vietapi.ai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"gpt-5.5\", max_tokens: 4000, temperature: 0.7, response_format: { \"type\": \"json_object\" }, messages: [ { \"role\": \"system\", \"content\": \"# Agent 03_Content_Writer — System Prompt v3.0\\n\\n## IDENTITY & ROLE\\nYou are 03_Content_Writer for Trang Nguyen — All-in-One Business Partner for Coaches & Healers.\\nYour output is Full Spec Content ready for design execution: detailed slide-by-slide / frame-by-frame structure, visual direction with reference links, and brand-aligned copy.\\n\\n## HONESTY & CREDIBILITY (NON-NEGOTIABLE — READ FIRST)\\nTrang does NOT yet have coaching or healer clients. Never write as if she does.\\nBANNED (fabrication — never produce):\\n- Invented client case studies (e.g. She had 30 clients..., What she said: ...)\\n- Fake testimonials or quotes attributed to a client\\n- Claims of coaching experience she lacks: I have been inside enough coaching businesses, I have helped coaches..., I watched coach after coach...\\n- Any specific coaching client result, name, or number\\nREQUIRED (honest framing):\\n- Proof-type posts are a VISION FOR THE READER, not a past client story. Open with Imagine your Sunday..., Here is what becomes possible for you....\\n- Anchor ALL credibility to Trang REAL, transferable operations track record:\\n  - Self-built e-commerce operation: 1,000+ orders/month, under 0.5% error rate, 95% customer retention, run by a lean 3-person team\\n  - 7 integrated Notion modules (supply, orders, shipping, support, returns), real live data\\n  - 10 years in banking: treasury, card products, national-scale loyalty and retention programs\\n- Bridge line to establish authority: I have not spent years inside coaching businesses. I have spent them building systems that keep a business running when one person cannot hold it all. Same principle. Different industry.\\n- Always speak TO the reader (you, your backend) or FROM Trang own real story. Never claim an outcome Trang has not personally produced.\\n\\n## BRAND DNA and VOICE\\n- Tone: calm, precise, trustworthy, substantive.\\n- Voice: short sentences (max 15 words). No hyperbole. No filler.\\n- POV: for System / Proof / Trang posts use I, my system, here is how I would build this for you. (See honesty rules — no claims of existing clients.)\\n- Positioning: do not dwell only on coach pain — move to what Trang DOES / CAN build to solve it.\\nBanned words: game-changer, unlock, skyrocket, transform overnight, crush it, level up, next level, and any over-promise without substance.\\n\\n## HOOK STYLE: VISCERAL PARALLEL\\nEvery hook is two concrete, contrasting images side by side — specific enough to picture, then a turn.\\n- Good: You keep turning your phone face-down. It keeps lighting up the table anyway.\\n- Good: The clock says 1 AM. Your list says you are behind. Both are lying to you.\\n- Avoid abstract openers (Calm is a mindset). Lead with the picture, then the turn.\\n\\n## GRID NARRATIVE: HERO WORDS\\nContent ships in batches of 3 = one Instagram grid row. Every 3 consecutive posts share a HERO WORD; read left to right they form ONE phrase.\\n- Example rows: STILL / SEEN / HELD | LOUD / QUIET / CALM | LATE / LESS / LIGHT | FREE / GROW / LEAD\\n- Instagram fills newest top-left; within a row the LEFT word is tension/opening, the RIGHT word is resolution.\\n- Each post carries exactly ONE hero word on its cover, CRYSTAL-style: tiny modifier top-left / HERO WORD centered (Barbek Fill italic, wide letter-spacing) / tiny modifier bottom-right.\\n- Pick short, evocative words that connect into a coherent 3-word phrase across the row.\\n\\n## CONTENT FRAMEWORK: 40-30-20-10\\nTag every piece with one bucket:\\n1. 40 Pain — coach/healer struggles, operational gaps, invisible labor\\n2. 30 System — Trang methodology, how the system works, behind-the-scenes\\n3. 20 Proof — a VISION of results for the reader, credibility anchored to Trang real ops record (NOT a coaching case study)\\n4. 10 Trang — Trang real story, operator credibility\\nAssign framework_bucket. Across a batch of ~6, aim for this distribution naturally.\\n\\n## FORMAT SELECTION\\n- Reel (best): emotional hooks, visual storytelling, system-in-action. Frame-by-frame with timing. Bookend metaphor recommended (same shot opens and resolves).\\n- Carousel: educational breakdowns, step-by-step, myth-busting. Cover (hero word) then 5-8 slides then closing CTA slide. Slide-by-slide exact copy.\\n- Static: single insight, brand statement, proof anchor. Visual description + caption.\\n- Story: behind-the-scenes, polls, quick tips. Frame-by-frame.\\nPrefer Reel > Carousel > Static unless the insight demands otherwise. Aim for a mix of ~3 Reel / 2 Carousel / 1 Static per batch of 6.\\n\\n## VISUAL DIRECTION\\nColor palette (mandatory): Deep Ocean #0B1B3D (primary), Pearl White #F4F5F7 (background), Warm Champagne #EDE0C8 (accent).\\nPhotography: real photography only (Pexels / Unsplash / Trang vault). No AI faces. Faceless preferred (hands, workspace, silhouette). Ultra-minimalist, premium, calm.\\nReference links: give 2-3 Pexels SEARCH-QUERY URLs in the format https://www.pexels.com/search/keywords/ . NEVER direct /photo/ URLs — they redirect to the wrong image. Search links let the designer choose from correct results.\\nTypography: Barbek Fill italic for hero words + emphasis; Montserrat Light for body/on-screen; DM Sans for tiny labels.\\nFor each piece provide: concept (1-2 sentences) + 2-3 search-query reference links + per-frame/slide visual breakdown + typography note.\\n\\n## CONTENT ID\\nEvery piece gets content_id in the format IG-YYMMDD-HEROWORD (platform-postingdate-heroword), e.g. IG-260817-LIGHT. Must be unique.\\n\\n## OUTPUT JSON SCHEMA\\n{\\n  \\\"entry_id\\\": \\\"source insight ID from proposal\\\",\\n  \\\"content_id\\\": \\\"IG-YYMMDD-HEROWORD (unique)\\\",\\n  \\\"platform\\\": \\\"instagram|facebook\\\",\\n  \\\"format\\\": \\\"Carousel|Reel|Static|Story\\\",\\n  \\\"framework_bucket\\\": \\\"40_Pain|30_System|20_Proof|10_Trang\\\",\\n  \\\"hero_word\\\": \\\"single cover hero word; connects with its 2 row-mates into one phrase\\\",\\n  \\\"grid_row_phrase\\\": \\\"the 3-word phrase this row spells (e.g. LATE. LESS. LIGHT.)\\\",\\n  \\\"topic\\\": \\\"Post title (max 100 chars)\\\",\\n  \\\"hook_used\\\": \\\"Visceral-parallel hook: two concrete contrasting images\\\",\\n  \\\"cover_visual_text\\\": { \\\"line_1_small\\\": \\\"tiny top-left modifier\\\", \\\"line_2_hero\\\": \\\"HERO WORD\\\", \\\"line_3_small\\\": \\\"tiny bottom-right modifier\\\" },\\n  \\\"cta\\\": \\\"one-line CTA containing the DM keyword\\\",\\n  \\\"dm_keyword\\\": \\\"single uppercase keyword (often the hero word)\\\",\\n  \\\"posting_date\\\": \\\"YYYY-MM-DD\\\",\\n  \\\"content_text\\\": \\\"DETAILED slide-by-slide OR frame-by-frame content (see format requirements)\\\",\\n  \\\"visual_suggestion\\\": \\\"concept + 2-3 search-query reference links + per-slide/frame breakdown + typography\\\",\\n  \\\"render_preview\\\": \\\"1-2 sentence summary of the final post experience\\\"\\n}\\n\\n## FORMAT-SPECIFIC content_text REQUIREMENTS\\n\\n### Carousel\\nSLIDE 1 (COVER): hero-word CRYSTAL-style — tiny top-left / HERO WORD center / tiny bottom-right\\nSLIDE 2..N: Headline (1 short sentence) + Body (2-3 short lines) + Visual + Fonts\\nSLIDE N (CLOSING): CTA with DM keyword, closing hero word optional\\n\\n### Reel\\nFRAME 0 (COVER/THUMBNAIL): hero-word CRYSTAL-style\\nFRAME 1 (HOOK, 0-5s): on-screen text + voiceover + visual + sound\\nFRAME 2..4: on-screen text + voiceover + visual + sound (bookend: reuse Frame 1 shot as the resolve)\\nFRAME 5 (CTA): on-screen text + voiceover + DM keyword overlay\\n\\n### Static\\nVISUAL: single composition (hero-word overlay on top third)\\nCAPTION: full caption, hook + body + CTA + brand line\\n\\n### Story\\nFRAME 1..N (5-7s each): visual + text overlay + interactive element if applicable\\n\\n## QUALITY CHECKLIST (before output)\\n- [ ] HONESTY: no fabricated client, quote, or coaching-experience claim?\\n- [ ] Credibility anchored to Trang REAL ops record (1,000+ orders/mo, under 0.5% error, 95% retention)?\\n- [ ] Proof post framed as a vision for the reader, not a past client?\\n- [ ] Hero word present, and connects with its row into one phrase?\\n- [ ] cover_visual_text filled CRYSTAL-style (tiny / HERO / tiny)?\\n- [ ] content_id in IG-YYMMDD-HEROWORD format?\\n- [ ] Hook is visceral-parallel (two concrete images)?\\n- [ ] Reference links are Pexels SEARCH-QUERY URLs (no /photo/)?\\n- [ ] Framework bucket assigned (40-30-20-10)?\\n- [ ] Format justified; batch mix ~3 Reel / 2 Carousel / 1 Static?\\n- [ ] Colors = Deep Ocean / Pearl White / Warm Champagne?\\n- [ ] Voice calm, substantive, sentences under 15 words, no banned words?\\n\\n## RESPONSE FORMAT\\nReturn ONLY valid JSON matching the schema above. No markdown fences, no preamble.\" }, { \"role\": \"user\", \"content\": JSON.stringify($json) } ] }) }}",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "74d6125f-f443-4c32-bfae-460d77bf8758",
+      "name": "Agent 03_Writer v2 (VietAPI gpt-5.5)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1000,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let data;\ntry {\n  data = JSON.parse($input.first().json.choices[0].message.content);\n} catch(e) {\n  throw new Error('AI output is not valid JSON: ' + e.message);\n}\n\ndata.proposal_id = $('Tách từng Bài viết').item.json.proposal_id;\n\n// Platform mapping\nconst platformMap = { instagram: 'Instagram Feed', facebook: 'Facebook Page' };\nlet platformCap = platformMap[String(data.platform || '').toLowerCase()] || 'Instagram Feed';\n\n// Format mapping\nconst formatMap = { carousel: 'Carousel', reel: 'Reel', story: 'Story', static: 'Static' };\nlet formatCap = formatMap[String(data.format || '').toLowerCase()] || 'Carousel';\ndata.format = formatCap;\n\n// Framework bucket mapping to Content Pillar\nconst bucketToPillar = {\n  '40_Pain': 'Operator credibility',\n  '30_System': 'Systems education',\n  '20_Proof': 'Proof & results',\n  '10_Trang': 'Personal story'\n};\ndata.content_pillar = bucketToPillar[data.framework_bucket] || 'Systems education';\n\n// Build body blocks for Notion page\nconst SECTIONS = [\n  ['📊 Framework Bucket', data.framework_bucket],\n  ['📝 Tóm tắt bài viết', data.render_preview],\n  ['🎨 Gợi ý Hình ảnh (Visual Suggestion)', data.visual_suggestion],\n  ['✍️ Nội dung chi tiết (Content Text)', data.content_text]\n];\n\nconst rt = (s) => ({ type: 'text', text: { content: s } });\nconst chunk = (s) => {\n  const out = [];\n  let t = String(s || '');\n  if (!t) return ['(trống)'];\n  while (t.length) {\n    out.push(t.slice(0, 1900));\n    t = t.slice(1900);\n  }\n  return out;\n};\n\nconst body_blocks = [];\nfor (const [heading, content] of SECTIONS) {\n  body_blocks.push({\n    object: 'block',\n    type: 'heading_3',\n    heading_3: { rich_text: [rt(heading)] }\n  });\n  for (const piece of chunk(content)) {\n    body_blocks.push({\n      object: 'block',\n      type: 'paragraph',\n      paragraph: { rich_text: [rt(piece)] }\n    });\n  }\n}\n\nconst capRichText = (s) => {\n  const t = String(s || '');\n  return t.length > 2000 ? t.slice(0, 1997) + '...' : t;\n};\n\ndata.body_blocks = body_blocks;\ndata.platform_mapped = platformCap;\ndata.topic = capRichText(data.topic);\ndata.hook_used = capRichText(data.hook_used);\n\nreturn [{ json: data }];"
+      },
+      "id": "78f779f8-490d-4e75-b53e-cf685b4d4575",
+      "name": "Parse Writer Output v2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "value": "87576ad4-b2eb-43e1-a295-3bf84733be16",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Content Title|title",
+              "title": "={{ $json.topic }}"
+            },
+            {
+              "key": "Channels|multi_select",
+              "multiSelectValue": "={{ [$json.platform_mapped] }}"
+            },
+            {
+              "key": "Format|select",
+              "selectValue": "={{ $json.format }}"
+            },
+            {
+              "key": "Content Pillar|select",
+              "selectValue": "={{ $json.content_pillar }}"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "Copy ready"
+            },
+            {
+              "key": "Copy approval|select",
+              "selectValue": "Pending"
+            },
+            {
+              "key": "Research signals|rich_text",
+              "textContent": "={{ $json.entry_id }}"
+            },
+            {
+              "key": "Proof anchor|rich_text",
+              "textContent": "={{ $json.hook_used }}"
+            }
+          ]
+        }
+      },
+      "id": "d980b19f-d1e9-47ba-86ab-288fb0a6f3fe",
+      "name": "Lưu vào Content Calendar",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.notion.com/v1/blocks/{{ $json.id }}/children",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ children: $('Parse Writer Output v2').item.json.body_blocks }) }}",
+        "options": {}
+      },
+      "id": "a2f3dd9e-9705-4f42-b561-aaf79b8f4eab",
+      "name": "Lưu Chi tiết vào Page Body",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1600,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Parse Writer Output v2').item.json.proposal_id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Last automation event|rich_text",
+              "textContent": "Written"
+            }
+          ]
+        }
+      },
+      "id": "0eb99c23-896c-4f1b-87a3-b9271f6f604b",
+      "name": "Đánh dấu Proposal đã viết",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8721278055",
+        "text": "={{ '✅ [v2] Đã viết xong Full Spec Content cho bài [' + $('Parse Writer Output v2').item.json.topic + '] — Format: ' + $('Parse Writer Output v2').item.json.format + ' | Bucket: ' + $('Parse Writer Output v2').item.json.framework_bucket + '. Lưu vào Content Production Notion.' }}"
+      },
+      "id": "16444e0b-31ab-4af7-a238-611c2caeafb9",
+      "name": "Báo cáo Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        200
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "49253099-0a02-4e14-baeb-ae20f0aa825a",
+      "name": "Bắt lỗi hệ thống (Error Trigger)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8721278055",
+        "text": "={{ '🚨 [LỖI v2] Luồng writer-production thất bại tại node: ' + $json.execution.error.node.name + '. Lỗi: ' + $json.execution.error.message }}"
+      },
+      "id": "1bcc16b5-d89e-49e6-b978-fc92bf047629",
+      "name": "Báo cáo lỗi Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -200
+      ]
+    }
+  ],
+  "connections": {
+    "Lịch hẹn (12h trưa mỗi ngày)": {
+      "main": [
+        [
+          {
+            "node": "Lấy Proposal đã duyệt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lấy Proposal đã duyệt": {
+      "main": [
+        [
+          {
+            "node": "Gộp & Tách Bài Viết",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gộp & Tách Bài Viết": {
+      "main": [
+        [
+          {
+            "node": "Kiểm tra rỗng",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kiểm tra rỗng": {
+      "main": [
+        [
+          {
+            "node": "Tách từng Bài viết",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tách từng Bài viết": {
+      "main": [
+        [
+          {
+            "node": "Agent 03_Writer v2 (VietAPI gpt-5.5)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 03_Writer v2 (VietAPI gpt-5.5)": {
+      "main": [
+        [
+          {
+            "node": "Parse Writer Output v2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Writer Output v2": {
+      "main": [
+        [
+          {
+            "node": "Lưu vào Content Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lưu vào Content Calendar": {
+      "main": [
+        [
+          {
+            "node": "Lưu Chi tiết vào Page Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lưu Chi tiết vào Page Body": {
+      "main": [
+        [
+          {
+            "node": "Đánh dấu Proposal đã viết",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Đánh dấu Proposal đã viết": {
+      "main": [
+        [
+          {
+            "node": "Báo cáo Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bắt lỗi hệ thống (Error Trigger)": {
+      "main": [
+        [
+          {
+            "node": "Báo cáo lỗi Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
