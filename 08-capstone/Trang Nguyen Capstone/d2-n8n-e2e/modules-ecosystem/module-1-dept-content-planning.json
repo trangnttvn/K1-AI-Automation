@@ -1,0 +1,372 @@
+{
+  "name": "Luồng 2A: Sinh Đề xuất Kế hoạch Bài viết (Planner) — Pain Point & Brand Calibrated — VietAPI Edition",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "bfb32edf-a4a0-402d-8137-9813dadc5963",
+      "name": "Lịch hẹn (8h sáng thứ Hai)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "2daaa695-27e1-4d6a-9625-c8a7ee941b7e",
+          "mode": "id"
+        },
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Last automation event|rich_text",
+              "condition": "does_not_contain",
+              "richTextValue": "Planned"
+            }
+          ]
+        }
+      },
+      "id": "87d9571c-f733-4b39-a42d-17a63e4522ba",
+      "name": "Tìm Insight Approved",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        220,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract Research Signals & Pain Point data from Notion DB\nconst items = $input.all();\nconst insights = [];\nconst skipped = [];\n\nfor (const it of items) {\n  const r = it.json || {};\n  const title = String(r.property_signal_title || r.name || '').trim();\n  const angle = String(r.property_content_angle || '').trim();\n  const exact_lang = String(r.property_exact_language || '').trim();\n  const bottleneck = String((r.property_bottleneck || {}).name || r.property_bottleneck || '').trim();\n\n  if (!title) {\n    skipped.push({ id: r.id, reason: 'missing Signal Title' });\n    continue;\n  }\n\n  let grounding = {};\n  try {\n    grounding = r.property_insight_json ? JSON.parse(r.property_insight_json) : {};\n  } catch (e) {\n    // Fallback if Insight JSON isn't present\n    grounding = {};\n  }\n\n  insights.push({\n    id: r.id,\n    insight_title: title,\n    content_anchor: angle || title,\n    bottleneck: bottleneck || 'Client Acquisition',\n    exact_language: exact_lang || title,\n    signal_type: (r.property_signal_type || [])[0] || 'pain',\n    theme: (r.property_theme || [])[0] || 'operations',\n    bridge: grounding.bridge || angle || 'Systems-first support for coaches',\n    hook_options: grounding.hooks || [exact_lang || title],\n    service_link: grounding.service || 'CRM & Automation Setup'\n  });\n}\n\nreturn [{ json: { count: insights.length, insights, skipped } }];"
+      },
+      "id": "c6925c44-b76d-4b50-b615-a45330a560dd",
+      "name": "Tổng hợp Insights",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.count }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "cbed9f6f-3bd2-493d-af47-cd8bc56739c9",
+      "name": "Kiểm tra rỗng",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8721278055",
+        "text": "ℹ️ Không có Insight/Pain Point nào mới chưa dùng tuần này. Workflow tạm dừng."
+      },
+      "id": "b0dd6537-df1d-4cb8-a3d2-0ea5edff7a51",
+      "name": "Thông báo không có Insight",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        880,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vietapi.ai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"claude-opus-4-20250514\", max_tokens: 2500, response_format: { \"type\": \"json_object\" }, messages: [ { \"role\": \"system\", \"content\": \"You are 02_Planner for Trang Nguyen \\u2014 All-in-One Business Partner for Coaches & Healers.\\n\\nCadence: 3 posts per week (Monday Carousel/Reel, Wednesday Reel/Static, Friday Story/Carousel).\\nBrand Voice: Calm, precise, minimalist, trustworthy. No hype, no exclamation marks.\\n\\nMANDATORY CONTENT FRAMEWORK (40/30/20/10):\\n1. 40% Pain/Awareness: Focus on the coach's bottleneck (overwhelm, operational chaos, inconsistent content). Goal: \\\"That's me.\\\"\\n2. 30% My System/Method: Focus on HOW Trang solves the pain. \\\"Inside my Business Partner System\\\", \\\"My content workflow\\\", \\\"My Weekly CEO Dashboard\\\". Goal: \\\"Trang has a system for this.\\\"\\n3. 20% Proof/Behind the Scenes: Show real work (screenshots, audits, client examples). Goal: \\\"Trang actually builds this.\\\"\\n4. 10% Trang (Who I Am): Values, journey (ex-banker, ecommerce), workspace. Goal: \\\"I know who Trang is.\\\"\\n\\nGiven the raw research signals, generate a 3-post weekly content plan that maps Pain Points to Solution Frameworks. \\n\\nReturn JSON strictly matching this structure:\\n{\\n  \\\"content_plan\\\": [\\n    {\\n      \\\"entry_id\\\": \\\"source insight id\\\",\\n      \\\"platform\\\": \\\"instagram\\\",\\n      \\\"format\\\": \\\"Carousel|Reel|Static|Story\\\",\\n      \\\"framework_bucket\\\": \\\"40_Pain | 30_System | 20_Proof | 10_Trang\\\",\\n      \\\"topic\\\": \\\"Post topic title\\\",\\n      \\\"exact_language_hook\\\": \\\"Exact quote from coach\\\",\\n      \\\"insight_title\\\": \\\"title\\\",\\n      \\\"solution_framework\\\": \\\"Name of Trang's system to solve this (e.g., My Decision Tree Framework)\\\",\\n      \\\"hook_options\\\": [\\\"Hook 1\\\", \\\"Hook 2\\\"],\\n      \\\"service_link\\\": \\\"Specific service offered (e.g. Content Operations Support, Client Support System)\\\"\\n    }\\n  ]\\n}\" }, { \"role\": \"user\", \"content\": JSON.stringify($json.insights) } ] }) }}",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "c6e0d348-c41d-4512-9a44-751925444f17",
+      "name": "Agent 02_Planner (VietAPI claude-opus-4-20250514)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        880,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let parsed;\ntry {\n  parsed = JSON.parse($input.first().json.choices[0].message.content);\n} catch (e) {\n  throw new Error('Planner khong tra ve JSON hop le: ' + String($input.first().json.choices[0].message.content).slice(0, 300));\n}\nconst plan = parsed.content_plan;\nif (!Array.isArray(plan) || !plan.length) {\n  throw new Error('Planner khong tra ve content_plan hop le.');\n}\n\nconst LIMIT = 1900;\nconst deferred = [];\nlet clean = [...plan];\nwhile (clean.length > 1 && JSON.stringify(clean).length > LIMIT) {\n  deferred.push(clean.pop());\n}\nlet raw_plan_json = JSON.stringify(clean);\n\nlet markdown = '## Đề xuất Kế hoạch Bài viết Tuần này (3 posts/tuần)\\n\\n';\nclean.forEach((p, idx) => {\n  markdown += `**Bài ${idx+1} [${p.bottleneck || 'Bottleneck'}]:** ${p.topic}\\n`;\n  markdown += `- Nền tảng: ${p.platform} | Định dạng: ${p.format}\\n`;\n  markdown += `- Hook ngôn ngữ thật: \\\"${p.exact_language_hook || p.topic}\\\"\\n\\n`;\n});\n\nconst capRichText = (s) => { const t = String(s || ''); return t.length > 2000 ? t.slice(0, 1997) + '...' : t; };\nconst usedIds = [...new Set(clean.map(p => p.entry_id).filter(Boolean))];\nreturn [{ json: { proposal_text: capRichText(markdown), raw_plan_json, signal_ids: usedIds, deferred_count: deferred.length } }];"
+      },
+      "id": "358ce38b-9dc9-4083-9a25-f1c7a21f3f8e",
+      "name": "Tạo Markdown Proposal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "value": "cf3ea4bf-e5d4-4cb0-96e7-432f1cea842c",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Proposal Name|title",
+              "title": "={{ 'Content Plan (3 posts) - ' + new Date().toISOString().split('T')[0] }}"
+            },
+            {
+              "key": "Calendar Proposal|rich_text",
+              "textContent": "={{ $json.proposal_text }}"
+            },
+            {
+              "key": "Raw Plan JSON|rich_text",
+              "textContent": "={{ $json.raw_plan_json }}"
+            },
+            {
+              "key": "Approval|status",
+              "statusValue": "Not started"
+            }
+          ]
+        }
+      },
+      "id": "5f527bb4-f290-4340-89e6-12c44de1e968",
+      "name": "Lưu vào Weekly Proposals",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8721278055",
+        "text": "={{ '✅ Đã đề xuất kế hoạch 3 bài tuần này dựa trên Pain Point & Exact Language của Coaches.\\n\\nXin mời Trang vào bảng [Weekly Content Proposals] trên Notion để duyệt.' }}"
+      },
+      "id": "0f843ef2-18ec-4963-8d1a-8ec4d1025072",
+      "name": "Báo cáo Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "signal_ids",
+        "options": {}
+      },
+      "id": "d26d1500-efb7-4314-ac70-555b11f661be",
+      "name": "Split Signals (Loop)",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        1320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $json.signal_ids }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Last automation event|rich_text",
+              "textContent": "Planned"
+            }
+          ]
+        }
+      },
+      "id": "27e8187d-3cbe-4337-af56-165f031ddc65",
+      "name": "Đánh dấu Signal đã dùng",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "5ca9cdb5-0c2a-449b-838f-ac47e1b4a018",
+      "name": "Bắt lỗi hệ thống (Error Trigger)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8721278055",
+        "text": "={{ '🚨 [LỖI] Luồng dept-content-n8n-workflow.json thất bại tại node: ' + $json.execution.error.node.name + '. Lỗi: ' + $json.execution.error.message }}"
+      },
+      "id": "01a3c1d8-5993-4fdd-9e7c-2a5758085792",
+      "name": "Báo cáo lỗi Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -200
+      ]
+    }
+  ],
+  "connections": {
+    "Lịch hẹn (8h sáng thứ Hai)": {
+      "main": [
+        [
+          {
+            "node": "Tìm Insight Approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tìm Insight Approved": {
+      "main": [
+        [
+          {
+            "node": "Tổng hợp Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tổng hợp Insights": {
+      "main": [
+        [
+          {
+            "node": "Kiểm tra rỗng",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kiểm tra rỗng": {
+      "main": [
+        [
+          {
+            "node": "Agent 02_Planner (OpenRouter)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Thông báo không có Insight",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 02_Planner (OpenRouter)": {
+      "main": [
+        [
+          {
+            "node": "Tạo Markdown Proposal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tạo Markdown Proposal": {
+      "main": [
+        [
+          {
+            "node": "Lưu vào Weekly Proposals",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Signals (Loop)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lưu vào Weekly Proposals": {
+      "main": [
+        [
+          {
+            "node": "Báo cáo Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Signals (Loop)": {
+      "main": [
+        [
+          {
+            "node": "Đánh dấu Signal đã dùng",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bắt lỗi hệ thống (Error Trigger)": {
+      "main": [
+        [
+          {
+            "node": "Báo cáo lỗi Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

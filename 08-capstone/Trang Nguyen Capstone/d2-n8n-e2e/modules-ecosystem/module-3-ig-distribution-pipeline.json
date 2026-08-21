@@ -1,0 +1,490 @@
+{
+  "name": "IG Static Design Pipeline v2 — Real Photo + Typography",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "7 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger-poll",
+      "name": "Poll every hour (:07)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [180, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/databases/87576ad4-b2eb-43e1-a295-3bf84733be16/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filter\": {\n    \"and\": [\n      { \"property\": \"Status\", \"status\": { \"equals\": \"Copy ready\" } },\n      { \"property\": \"Format\", \"select\": { \"equals\": \"Static\" } },\n      { \"property\": \"Design approval\", \"select\": { \"does_not_equal\": \"Approved\" } }\n    ]\n  },\n  \"page_size\": 5\n}"
+      },
+      "id": "notion-query",
+      "name": "Notion: Query Content Production DB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "NOTION_TOKEN",
+          "name": "Notion Integration Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "id": "split-pages",
+      "name": "Split into pages",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3.4,
+      "position": [660, 400]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://api.notion.com/v1/blocks/' + $json.id + '/children?page_size=100' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        }
+      },
+      "id": "notion-blocks",
+      "name": "Fetch page blocks (visual spec)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "NOTION_TOKEN",
+          "name": "Notion Integration Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract metadata from Notion page\nconst page = $('Split into pages').item.json;\nconst blocks = $json.results;\nconst props = page.properties;\n\nfunction txt(p) {\n  if (!p) return '';\n  if (p.type === 'title') return (p.title || []).map(t => t.plain_text).join('');\n  if (p.type === 'select') return p.select ? p.select.name : '';\n  if (p.type === 'rich_text') return (p.rich_text || []).map(t => t.plain_text).join('');\n  return '';\n}\n\n// Extract unsplash keywords from visual spec blocks\nlet keywords = ['window', 'curtain', 'morning light', 'minimal'];\nconst visualBlock = blocks.find(b => b.type === 'paragraph' &&\n  (b.paragraph.rich_text[0]?.plain_text || '').toLowerCase().includes('visual'));\nif (visualBlock) {\n  const vis = visualBlock.paragraph.rich_text.map(t => t.plain_text).join('');\n  // Extract keywords heuristically\n  if (vis.includes('window')) keywords.push('window');\n  if (vis.includes('curtain')) keywords.push('curtain');\n  if (vis.includes('light')) keywords.push('soft light');\n}\n\nconst artifact = {\n  project_id: txt(props['Content ID']).replace(/[^A-Z0-9-]/g, '') || 'UNKNOWN',\n  content_id: txt(props['Content ID']),\n  content_type: 'STATIC',\n  source_mode: 'NOTION_CONTENT_PRODUCTION',\n  notion_page_id: page.id,\n  unsplash_keywords: keywords,\n  status: txt(props['Status'])\n};\n\nreturn [{ json: artifact }];"
+      },
+      "id": "adapter",
+      "name": "Adapter: Notion → content-design artifact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1140, 400]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://api.unsplash.com/search/photos?query=' + $json.unsplash_keywords.join(' ') + '&per_page=10&orientation=portrait' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Client-ID ' + $env.UNSPLASH_ACCESS_KEY }}"
+            }
+          ]
+        }
+      },
+      "id": "unsplash-search",
+      "name": "Unsplash: Search photos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1380, 400],
+      "notes": "Search Unsplash for real editorial photos matching keywords"
+    },
+    {
+      "parameters": {
+        "jsCode": "const adapter = $('Adapter: Notion → content-design artifact').item.json;\nconst photos = $json.results;\n\nconst finalists = photos.slice(0, 5).map((p, i) => ({\n  id: p.id,\n  url: p.urls.raw + '?w=1080&h=1350&fit=crop&q=85',\n  photographer: p.user.name,\n  status: i === 0 ? 'approved' : 'candidate', // Auto-approve first for pilot\n  thumbnail: p.urls.thumb\n}));\n\nreturn [{\n  json: {\n    ...adapter,\n    unsplash_finalists: finalists,\n    approved_photo_url: finalists[0].url\n  }\n}];"
+      },
+      "id": "format-finalists",
+      "name": "Format photo finalists",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1620, 400],
+      "notes": "For pilot: auto-approve first photo. In production: send to Notion for human review."
+    },
+    {
+      "parameters": {
+        "command": "={{ 'cd \"D:/TRANG/Knowledge Hub/Antigravity/Antigravity Test/hocvien_k1_aiautomation/07-ai-video/build/pilot-free/render\" && node render-png.js --bg \"' + $json.approved_photo_url + '\" --out \"' + $json.content_id + '.png\"' }}"
+      },
+      "id": "render-png",
+      "name": "Render: Typography + Photo → PNG",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [1860, 400],
+      "notes": "Puppeteer renders HTML with real photo background"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://api.notion.com/v1/pages/' + $('Adapter: Notion → content-design artifact').item.json.notion_page_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"Design approval\": { \"select\": { \"name\": \"Pending\" } }\n  }\n}"
+      },
+      "id": "gate1-set-pending",
+      "name": "GATE 1: Set Design approval = Pending",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2100, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "NOTION_TOKEN",
+          "name": "Notion Integration Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "hours"
+      },
+      "id": "gate1-wait",
+      "name": "Wait for Design approval",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2340, 400],
+      "webhookId": "gate1-approval"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://api.notion.com/v1/pages/' + $('Adapter: Notion → content-design artifact').item.json.notion_page_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        }
+      },
+      "id": "gate1-recheck",
+      "name": "Re-read Design approval status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2580, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "NOTION_TOKEN",
+          "name": "Notion Integration Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.properties['Design approval'].select.name }}",
+              "rightValue": "Approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "gate1-if",
+      "name": "IF Design approved",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2820, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://graph.facebook.com/v21.0/' + $env.IG_USER_ID + '/media' }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "image_url",
+              "value": "={{ $json.uploaded_asset_url }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $json.caption }}"
+            },
+            {
+              "name": "access_token",
+              "value": "={{ $env.IG_ACCESS_TOKEN }}"
+            }
+          ]
+        }
+      },
+      "id": "ig-create-container",
+      "name": "IG: Create media container",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3060, 320],
+      "notes": "uploaded_asset_url must be public HTTPS (S3/Cloudinary)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://graph.facebook.com/v21.0/' + $env.IG_USER_ID + '/media_publish' }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "creation_id",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "access_token",
+              "value": "={{ $env.IG_ACCESS_TOKEN }}"
+            }
+          ]
+        }
+      },
+      "id": "ig-publish",
+      "name": "IG: Publish media",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3300, 320]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://api.notion.com/v1/pages/' + $('Adapter: Notion → content-design artifact').item.json.notion_page_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"Status\": { \"status\": { \"name\": \"Posted\" } },\n    \"Instagram Post ID\": { \"rich_text\": [{ \"text\": { \"content\": \"={{ $json.id }}\" } }] }\n  }\n}"
+      },
+      "id": "notion-mark-posted",
+      "name": "Notion: Mark Posted + save Post ID",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3540, 320],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "NOTION_TOKEN",
+          "name": "Notion Integration Token"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Poll every hour (:07)": {
+      "main": [
+        [
+          {
+            "node": "Notion: Query Content Production DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion: Query Content Production DB": {
+      "main": [
+        [
+          {
+            "node": "Split into pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split into pages": {
+      "main": [
+        [
+          {
+            "node": "Fetch page blocks (visual spec)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch page blocks (visual spec)": {
+      "main": [
+        [
+          {
+            "node": "Adapter: Notion → content-design artifact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adapter: Notion → content-design artifact": {
+      "main": [
+        [
+          {
+            "node": "Unsplash: Search photos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unsplash: Search photos": {
+      "main": [
+        [
+          {
+            "node": "Format photo finalists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format photo finalists": {
+      "main": [
+        [
+          {
+            "node": "Render: Typography + Photo → PNG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render: Typography + Photo → PNG": {
+      "main": [
+        [
+          {
+            "node": "GATE 1: Set Design approval = Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GATE 1: Set Design approval = Pending": {
+      "main": [
+        [
+          {
+            "node": "Wait for Design approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Design approval": {
+      "main": [
+        [
+          {
+            "node": "Re-read Design approval status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-read Design approval status": {
+      "main": [
+        [
+          {
+            "node": "IF Design approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Design approved": {
+      "main": [
+        [
+          {
+            "node": "IG: Create media container",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "IG: Create media container": {
+      "main": [
+        [
+          {
+            "node": "IG: Publish media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG: Publish media": {
+      "main": [
+        [
+          {
+            "node": "Notion: Mark Posted + save Post ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "description": "IG Static Pipeline v2.0 — Real photo from Unsplash + programmatic typography. No AI image generation.",
+    "version": "2.0.0"
+  }
+}

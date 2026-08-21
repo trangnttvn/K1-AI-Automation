@@ -1,0 +1,410 @@
+{
+  "name": "Luồng 2B: Content Production (Writer) — OpenRouter & Minimalist Calibrated — VietAPI Edition",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 12
+            }
+          ]
+        }
+      },
+      "id": "add7f5e3-3b4c-4c46-83cb-4c8e07df8742",
+      "name": "Lịch hẹn (12h trưa mỗi ngày)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "cf3ea4bf-e5d4-4cb0-96e7-432f1cea842c",
+          "mode": "id"
+        },
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Approval|status",
+              "condition": "equals",
+              "statusValue": "Done"
+            },
+            {
+              "key": "Last automation event|rich_text",
+              "condition": "does_not_contain",
+              "richTextValue": "Written"
+            }
+          ]
+        }
+      },
+      "id": "6720b8c4-ab0c-4c81-be0d-ca06b22951d7",
+      "name": "Lấy Proposal đã duyệt",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        200,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (items.length === 0) {\n  return [{ json: { count: 0 } }];\n}\nconst allPlans = [];\nconst failed = [];\n\nitems.forEach(item => {\n  const raw = item.json.property_raw_plan_json;\n  let planArr;\n  try {\n    planArr = JSON.parse(raw);\n  } catch (e) {\n    failed.push({ id: item.json.id, reason: 'Raw Plan JSON khong parse duoc', preview: String(raw || '').slice(0, 120) });\n    return;\n  }\n  if (!Array.isArray(planArr)) {\n    failed.push({ id: item.json.id, reason: 'Raw Plan JSON khong phai array' });\n    return;\n  }\n  planArr.forEach(p => {\n    p.proposal_id = item.json.id;\n    allPlans.push(p);\n  });\n});\n\nif (failed.length && allPlans.length === 0) {\n  throw new Error('Khong doc duoc proposal nao: ' + JSON.stringify(failed));\n}\n\nreturn [{ json: { count: allPlans.length, plans: allPlans, failed } }];"
+      },
+      "id": "2e4643d1-bfd1-495e-b407-80827a1de4d4",
+      "name": "Gộp & Tách Bài Viết",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.count }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "2d9c46b7-34d6-4d3e-a612-4364149020f2",
+      "name": "Kiểm tra rỗng",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        600,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "plans",
+        "options": {}
+      },
+      "id": "2eb31e56-8bc5-4a21-837f-7c3bf665992f",
+      "name": "Tách từng Bài viết",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        800,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vietapi.ai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"gpt-5.5\", max_tokens: 3000, response_format: { \"type\": \"json_object\" }, messages: [ { \"role\": \"system\", \"content\": \"You are 03_Content_Writer for Trang Nguyen \\u2014 All-in-One Business Partner for Coaches & Healers.\\n\\nBRAND DNA & VOICE RULES:\\n- Tone: Calm, precise, trustworthy, substantive.\\n- Voice: Short sentences (max 15 words). No hyperbole. \\n- Identity: You are Trang. When writing System/Proof/Trang posts, use \\\"I\\\", \\\"my system\\\", \\\"Here is how I help coaches...\\\". Move away from only discussing the coach's pain, and focus on WHAT TRANG DOES to solve it.\\n\\nVISUAL & AESTHETIC RULES:\\n- Direct to REAL PHOTOGRAPHY (Pexels / Personal Vault). No AI faces.\\n- Ultra-Minimalist: Cover slide must have MAXIMUM 3-4 words (e.g., \\\"THINKING IN SYSTEMS\\\", \\\"YOUR SYSTEMS NEED HELP.\\\"). Reduce text blocks. \\n- Color palette: Deep Ocean (#0B1B3D), Pearl White (#F4F5F7), Warm Champagne (#EDE0C8).\\n\\nGenerate Full Spec Content in JSON:\\n{\\n  \\\"entry_id\\\": \\\"source insight id\\\",\\n  \\\"platform\\\": \\\"instagram|facebook\\\",\\n  \\\"format\\\": \\\"Carousel|Reel|Static|Story\\\",\\n  \\\"framework_bucket\\\": \\\"40_Pain | 30_System | 20_Proof | 10_Trang\\\",\\n  \\\"topic\\\": \\\"Post Title\\\",\\n  \\\"hook_used\\\": \\\"Exact Language Hook\\\",\\n  \\\"content_text\\\": \\\"Full post body with clear slide-by-slide structure. If Carousel, Slide 1 MUST HAVE ONLY 1-4 WORDS.\\\",\\n  \\\"visual_suggestion\\\": \\\"Specific real photography direction. Must feel premium and calm.\\\",\\n  \\\"render_preview\\\": \\\"1-2 sentence visual summary\\\"\\n}\" }, { \"role\": \"user\", \"content\": JSON.stringify($json) } ] }) }}",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "74d6125f-f443-4c32-bfae-460d77bf8758",
+      "name": "Agent 03_Writer (VietAPI gpt-5.5)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1000,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let data;\ntry {\n  data = JSON.parse($input.first().json.choices[0].message.content);\n} catch(e) {\n  throw new Error('AI output is not valid JSON');\n}\ndata.proposal_id = $('Tách từng Bài viết').item.json.proposal_id;\n\nconst platformMap = { instagram: 'Instagram Feed', facebook: 'Facebook Page' };\nlet platformCap = platformMap[String(data.platform || '').toLowerCase()] || 'Instagram Feed';\n\nconst formatMap = { carousel: 'Carousel', reel: 'Reel', story: 'Story', static: 'Static' };\nlet formatCap = formatMap[String(data.format || '').toLowerCase()] || 'Carousel';\ndata.format = formatCap;\n\nconst SECTIONS = [\n  ['📝 Tóm tắt bài viết', data.render_preview],\n  ['🎨 Gợi ý Hình ảnh THẬT (Visual)', data.visual_suggestion],\n  ['✍️ Nội dung (Full Spec Content)', data.content_text]\n];\nconst rt = (s) => ({ type: 'text', text: { content: s } });\nconst chunk = (s) => { const out = []; let t = String(s || ''); if (!t) return ['(trong)']; while (t.length) { out.push(t.slice(0, 1900)); t = t.slice(1900); } return out; };\nconst body_blocks = [];\nfor (const [heading, content] of SECTIONS) {\n  body_blocks.push({ object: 'block', type: 'heading_3', heading_3: { rich_text: [rt(heading)] } });\n  for (const piece of chunk(content)) {\n    body_blocks.push({ object: 'block', type: 'paragraph', paragraph: { rich_text: [rt(piece)] } });\n  }\n}\n\nconst capRichText = (s) => { const t = String(s || ''); return t.length > 2000 ? t.slice(0, 1997) + '...' : t; };\n\ndata.body_blocks = body_blocks;\ndata.platform_mapped = platformCap;\ndata.topic = capRichText(data.topic);\ndata.hook_used = capRichText(data.hook_used);\n\nreturn [{ json: data }];"
+      },
+      "id": "78f779f8-490d-4e75-b53e-cf685b4d4575",
+      "name": "Parse Writer Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "value": "87576ad4-b2eb-43e1-a295-3bf84733be16",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Content Title|title",
+              "title": "={{ $json.topic }}"
+            },
+            {
+              "key": "Channels|multi_select",
+              "multiSelectValue": "={{ [$json.platform_mapped] }}"
+            },
+            {
+              "key": "Format|select",
+              "selectValue": "={{ $json.format }}"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "Copy ready"
+            },
+            {
+              "key": "Copy approval|select",
+              "selectValue": "Pending"
+            },
+            {
+              "key": "Research signals|rich_text",
+              "textContent": "={{ $json.entry_id }}"
+            },
+            {
+              "key": "Proof anchor|rich_text",
+              "textContent": "={{ $json.hook_used }}"
+            }
+          ]
+        }
+      },
+      "id": "d980b19f-d1e9-47ba-86ab-288fb0a6f3fe",
+      "name": "Lưu vào Content Calendar",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.notion.com/v1/blocks/{{ $json.id }}/children",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "notionApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ children: $('Parse Writer Output').item.json.body_blocks }) }}",
+        "options": {}
+      },
+      "id": "a2f3dd9e-9705-4f42-b561-aaf79b8f4eab",
+      "name": "Lưu Chi tiết vào Page Body",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1600,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Parse Writer Output').item.json.proposal_id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Last automation event|rich_text",
+              "textContent": "Written"
+            }
+          ]
+        }
+      },
+      "id": "0eb99c23-896c-4f1b-87a3-b9271f6f604b",
+      "name": "Đánh dấu Proposal đã viết",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8721278055",
+        "text": "={{ '✅ Đã viết xong Full Spec Content cho bài [' + $('Parse Writer Output').item.json.topic + '] và lưu vào Content Production Notion.' }}"
+      },
+      "id": "16444e0b-31ab-4af7-a238-611c2caeafb9",
+      "name": "Báo cáo Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        200
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "49253099-0a02-4e14-baeb-ae20f0aa825a",
+      "name": "Bắt lỗi hệ thống (Error Trigger)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8721278055",
+        "text": "={{ '🚨 [LỖI] Luồng writer-production-n8n-workflow.json thất bại tại node: ' + $json.execution.error.node.name + '. Lỗi: ' + $json.execution.error.message }}"
+      },
+      "id": "1bcc16b5-d89e-49e6-b978-fc92bf047629",
+      "name": "Báo cáo lỗi Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -200
+      ]
+    }
+  ],
+  "connections": {
+    "Lịch hẹn (12h trưa mỗi ngày)": {
+      "main": [
+        [
+          {
+            "node": "Lấy Proposal đã duyệt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lấy Proposal đã duyệt": {
+      "main": [
+        [
+          {
+            "node": "Gộp & Tách Bài Viết",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gộp & Tách Bài Viết": {
+      "main": [
+        [
+          {
+            "node": "Kiểm tra rỗng",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kiểm tra rỗng": {
+      "main": [
+        [
+          {
+            "node": "Tách từng Bài viết",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tách từng Bài viết": {
+      "main": [
+        [
+          {
+            "node": "Agent 03_Writer (OpenRouter)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 03_Writer (OpenRouter)": {
+      "main": [
+        [
+          {
+            "node": "Parse Writer Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Writer Output": {
+      "main": [
+        [
+          {
+            "node": "Lưu vào Content Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lưu vào Content Calendar": {
+      "main": [
+        [
+          {
+            "node": "Lưu Chi tiết vào Page Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lưu Chi tiết vào Page Body": {
+      "main": [
+        [
+          {
+            "node": "Đánh dấu Proposal đã viết",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Đánh dấu Proposal đã viết": {
+      "main": [
+        [
+          {
+            "node": "Báo cáo Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bắt lỗi hệ thống (Error Trigger)": {
+      "main": [
+        [
+          {
+            "node": "Báo cáo lỗi Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

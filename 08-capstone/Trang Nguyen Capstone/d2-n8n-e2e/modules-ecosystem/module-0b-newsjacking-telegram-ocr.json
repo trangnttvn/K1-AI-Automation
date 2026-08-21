@@ -1,0 +1,460 @@
+{
+  "name": "Luồng 1: Newsjacking & Evergreen Intelligence (Tavily + OpenRouter)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ]
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789001",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -220,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ String($json.message.from.id).trim() }}",
+              "operation": "equal",
+              "value2": "8721278055"
+            }
+          ]
+        }
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789002",
+      "name": "Check Admin ID",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "⛔ Bạn không có quyền sử dụng bot này."
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789008",
+      "name": "Từ chối truy cập",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        220,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ !!($('Telegram Trigger').item.json.message.photo) }}",
+              "operation": "equal",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789010",
+      "name": "Có ảnh không?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        220,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.photo.slice(-1)[0].file_id }}"
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789011",
+      "name": "Download Ảnh Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        440,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "HTTP-Referer",
+              "value": "https://antigravity.ai"
+            },
+            {
+              "name": "X-Title",
+              "value": "Newsjacking OCR Vision"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"google/gemini-2.5-flash\", max_tokens: 1000, messages: [ { role: \"system\", content: \"You are an OCR engine reading screenshots sent by a business owner in the coaching/healing industry. Transcribe text and summarize core pain point.\" }, { role: \"user\", content: [ { type: \"text\", text: \"Caption: \" + ($('Telegram Trigger').item.json.message.caption || '') }, { type: \"image_url\", image_url: { url: \"data:image/jpeg;base64,\" + $json.data } } ] } ] }) }}"
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789012",
+      "name": "OCR Vision (Gemini Flash)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        660,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const caption = $('Telegram Trigger').item.json.message.caption || '';\nlet vision = $json.choices[0].message.content || '';\nconst parts = [];\nif (caption.trim()) parts.push('Caption: ' + caption.trim());\nparts.push('Noi dung doc tu anh: ' + vision.trim());\nreturn [{ json: { signal_text: parts.join('\\n\\n'), source_kind: 'image' } }];"
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789013",
+      "name": "Chuẩn hóa (ảnh)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $json.message || {};\nconst text = msg.text || msg.caption || '';\nreturn [{ json: { signal_text: text.trim(), source_kind: 'text' } }];"
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789014",
+      "name": "Chuẩn hóa (text)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ ($('Telegram Trigger').item.json.message.text || $('Telegram Trigger').item.json.message.caption || '').toLowerCase() }}",
+              "operation": "contains",
+              "value2": "#trend"
+            },
+            {
+              "value1": "={{ ($('Telegram Trigger').item.json.message.text || $('Telegram Trigger').item.json.message.caption || '').toLowerCase() }}",
+              "operation": "contains",
+              "value2": "#news"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789009",
+      "name": "Phân luồng (#trend?)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.tavily.com/search",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ 'trending news in psychology, mindset, life coaching related to: ' + $json.signal_text }}"
+            },
+            {
+              "name": "search_depth",
+              "value": "basic"
+            },
+            {
+              "name": "max_results",
+              "value": 5
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789004",
+      "name": "Tavily Search News",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1320,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "HTTP-Referer",
+              "value": "https://antigravity.ai"
+            },
+            {
+              "name": "X-Title",
+              "value": "Newsjacking AI Agent"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"anthropic/claude-3.5-sonnet\", max_tokens: 2000, response_format: { \"type\": \"json_object\" }, messages: [ { \"role\": \"system\", \"content\": \"You are an elite Marketing Strategist specializing in Newsjacking & Evergreen content for Trang Nguyen (All-in-One Business Partner for Coaches & Healers).\\n\\nBridge psychology/trending news with coach operational friction (CRM, funnels, email sequences, SOPs, scheduling, onboarding).\\n\\nReturn JSON:\\n{\\n  \\\"insight_title\\\": \\\"Title (max 15 words)\\\",\\n  \\\"pain_decoded\\\": \\\"Psychological mechanism behind pain\\\",\\n  \\\"news_decoded\\\": \\\"Core trend insight\\\",\\n  \\\"bridge\\\": \\\"Aha moment connection to Trang's service\\\",\\n  \\\"content_anchor\\\": \\\"Social post hook\\\",\\n  \\\"hook_options\\\": [\\\"Hook 1\\\", \\\"Hook 2\\\"],\\n  \\\"service_link\\\": \\\"CRM setup|email sequences|funnel builds|SOP documentation|scheduling|client onboarding\\\"\\n}\" }, { \"role\": \"user\", \"content\": JSON.stringify($json) } ] }) }}"
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789005",
+      "name": "Newsjacking AI Agent (OpenRouter)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1540,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let ai;\ntry {\n  ai = JSON.parse($json.choices[0].message.content);\n} catch (e) {\n  throw new Error('AI khong tra ve JSON hop le: ' + $json.choices[0].message.content);\n}\n\nconst capRichText = (s) => { const t = String(s || ''); return t.length > 2000 ? t.slice(0, 1997) + '...' : t; };\nconst rawSignal = capRichText(String($('Phân luồng (#trend?)').item.json.signal_text || '').replace(/#(trend|news)/gi, '').trim());\n\nconst SECTIONS = [\n  ['🧠 Pain Decoded', ai.pain_decoded],\n  ['📰 News Decoded', ai.news_decoded],\n  ['🌉 The Bridge', ai.bridge],\n  ['🪝 Hook Options', Array.isArray(ai.hook_options) ? ai.hook_options.map(h => '- ' + h).join('\\n') : String(ai.hook_options || '')],\n  ['🔗 Service Link', ai.service_link]\n];\nconst rt = (s) => ({ type: 'text', text: { content: s } });\nconst chunk = (s) => { const out = []; let t = String(s || ''); if (!t) return ['(trong)']; while (t.length) { out.push(t.slice(0, 1900)); t = t.slice(1900); } return out; };\nconst body_blocks = [];\nfor (const [heading, content] of SECTIONS) {\n  body_blocks.push({ object: 'block', type: 'heading_3', heading_3: { rich_text: [rt(heading)] } });\n  for (const piece of chunk(content)) {\n    body_blocks.push({ object: 'block', type: 'paragraph', paragraph: { rich_text: [rt(piece)] } });\n  }\n}\n\nconst insightJson = JSON.stringify({\n  bridge: ai.bridge,\n  news: ai.news_decoded,\n  hooks: Array.isArray(ai.hook_options) ? ai.hook_options : [String(ai.hook_options || '')],\n  service: ai.service_link\n});\nconst insightJsonSafe = insightJson.length > 1900 ? insightJson.slice(0, 1897) + '...' : insightJson;\n\nreturn [{ json: {\n  insight_title: capRichText(ai.insight_title),\n  content_anchor: capRichText(ai.content_anchor),\n  raw_signal: rawSignal,\n  body_blocks: body_blocks,\n  insight_json: insightJsonSafe,\n  service_link: ai.service_link,\n  captured_at: new Date().toISOString()\n} }];"
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789005b",
+      "name": "Parse Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "value": "2daaa695-27e1-4d6a-9625-c8a7ee941b7e",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Signal Title|title",
+              "title": "={{ $json.insight_title }}"
+            },
+            {
+              "key": "Content Angle|rich_text",
+              "textContent": "={{ $json.content_anchor }}"
+            },
+            {
+              "key": "Raw Signal|rich_text",
+              "textContent": "={{ $json.raw_signal }}"
+            },
+            {
+              "key": "Insight JSON|rich_text",
+              "textContent": "={{ $json.insight_json }}"
+            },
+            {
+              "key": "Source Type|select",
+              "selectValue": "Manual"
+            }
+          ]
+        }
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789006",
+      "name": "Lưu vào Research Signals Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "8721278055",
+        "text": "={{ '✅ Đã phân tích Newsjacking & Evergreen thành công bài [' + $json.insight_title + '] và lưu vào Research Signals Notion.' }}"
+      },
+      "id": "e6f49c5e-85b4-4d87-9c60-123456789007",
+      "name": "Báo cáo Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        80
+      ]
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check Admin ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Admin ID": {
+      "main": [
+        [
+          {
+            "node": "Có ảnh không?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Từ chối truy cập",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Có ảnh không?": {
+      "main": [
+        [
+          {
+            "node": "Download Ảnh Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chuẩn hóa (text)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Ảnh Telegram": {
+      "main": [
+        [
+          {
+            "node": "OCR Vision (Gemini Flash)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR Vision (Gemini Flash)": {
+      "main": [
+        [
+          {
+            "node": "Chuẩn hóa (ảnh)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chuẩn hóa (ảnh)": {
+      "main": [
+        [
+          {
+            "node": "Phân luồng (#trend?)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chuẩn hóa (text)": {
+      "main": [
+        [
+          {
+            "node": "Phân luồng (#trend?)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Phân luồng (#trend?)": {
+      "main": [
+        [
+          {
+            "node": "Tavily Search News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Search News": {
+      "main": [
+        [
+          {
+            "node": "Newsjacking AI Agent (OpenRouter)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Newsjacking AI Agent (OpenRouter)": {
+      "main": [
+        [
+          {
+            "node": "Parse Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Payload": {
+      "main": [
+        [
+          {
+            "node": "Lưu vào Research Signals Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lưu vào Research Signals Notion": {
+      "main": [
+        [
+          {
+            "node": "Báo cáo Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

@@ -5,7 +5,9 @@
 ---
 
 ## 1. Bối cảnh & Hợp đồng nghiệm thu
-- **Mục tiêu:** Xây dựng workflow n8n nhận yêu cầu chủ đề (On-demand qua Webhook hoặc Polling) -> Kiểm tra tính hợp lệ -> Kích hoạt AI Agent sinh Content Full Spec (Carousel 5 slide chuẩn Brand Guidelines Trang Nguyen) -> Đồng bộ hóa vào Notion Database `Content Production` (`87576ad4-b2eb-43e1-a295-3bf84733be16`) -> Phản hồi kết quả.
+- **Mục tiêu:** Xây dựng hệ thống tự động hóa n8n hoàn chỉnh gồm:
+  - **Master Pipeline Controller (`workflow-content-operations-pipeline.json`):** Nhận Webhook On-demand từ Web App MVP -> Kiểm tra tính hợp lệ -> Kích hoạt AI Agent sinh Content Full Spec (Carousel 5 slide chuẩn Brand Guidelines Trang Nguyen) -> Đồng bộ hóa vào Notion Database `Content Production` (`87576ad4...`) -> Phản hồi kết quả.
+  - **Hệ Sinh Thái 4 Module Workflows (`modules-ecosystem/`):** Chứa 5 workflow chuyên biệt độc lập (Module 0A Apify Crawler, Module 0B Newsjacking Telegram OCR, Module 1 Dept-Content Planning, Module 2 Writer Spec, Module 3 IG Distribution). Chi tiết xem tại: [`modules-ecosystem/README-ECOSYSTEM.md`](./modules-ecosystem/README-ECOSYSTEM.md).
 - **Ánh xạ Asserts:** Toàn bộ các thay đổi node đều nhắm trúng 5 Asserts trong [`e2e-test.md`](file:///d:/TRANG/Knowledge%20Hub/Antigravity/Antigravity%20Test/hocvien_k1_aiautomation/08-capstone/Trang%20Nguyen%20Capstone/d2-n8n-e2e/e2e-test.md):
   - `A-1`: Workflow chạy thông suốt từ Webhook, không crash.
   - `A-2`: Schema Full Spec đúng 100% (Metadata, Copy, 5 slide Storyboard, Visual links).
