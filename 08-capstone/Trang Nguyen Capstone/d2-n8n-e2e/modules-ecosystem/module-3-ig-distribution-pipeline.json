@@ -1,5 +1,5 @@
 {
-  "name": "IG Static Design Pipeline v2 — Daily 6AM & Telegram Approval",
+  "name": "IG Static Design Pipeline v2 — Daily 6AM & Telegram Native Control",
   "nodes": [
     {
       "parameters": {
@@ -21,18 +21,24 @@
     },
     {
       "parameters": {
-        "httpMethod": "POST",
-        "path": "ig-distribution-trigger",
-        "responseMode": "responseNode",
-        "options": {}
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
       },
-      "id": "trigger-on-demand",
-      "name": "Trigger: On-Demand Webhook (Trang Request)",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "id": "trigger-telegram-on-demand",
+      "name": "Trigger: Telegram Bot Command / Message (Trang Request)",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
       "position": [180, 480],
-      "webhookId": "ig-distribution-trigger",
-      "notes": "Kích hoạt tức thì theo yêu cầu của Trang từ Web App hoặc API"
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_BOT_TOKEN",
+          "name": "Telegram Bot Account"
+        }
+      },
+      "notes": "Nhận lệnh on-demand từ Trang qua Telegram (nhắn /post, /publish hoặc gửi tin nhắn)"
     },
     {
       "parameters": {
@@ -193,10 +199,10 @@
         "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_BOT_TOKEN + '/sendPhoto' }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"chat_id\": \"={{ $env.TELEGRAM_CHAT_ID }}\",\n  \"photo\": \"={{ $('Format photo finalists').item.json.approved_photo_url }}\",\n  \"caption\": \"🎨 *[THÔNG BÁO THIẾT KẾ ĐÃ SẴN SÀNG]*\\n\\n📌 *Content ID:* `\" + $('Adapter: Notion → content-design artifact').item.json.content_id + \"`\\n📝 *Caption Preview:* \" + $('Adapter: Notion → content-design artifact').item.json.caption.slice(0, 100) + \"...\\n\\n👉 *Trang vui lòng bấm nút bên dưới để duyệt đăng ngay mà không cần mở Notion:*\",\n  \"parse_mode\": \"Markdown\",\n  \"reply_markup\": {\n    \"inline_keyboard\": [\n      [\n        {\n          \"text\": \"✅ DUYỆT & ĐĂNG INSTAGRAM NGAY\",\n          \"url\": \"={{ $env.N8N_BASE_URL || 'http://localhost:5678' }}/webhook/gate1-approval?action=approve&page_id=\" + $('Adapter: Notion → content-design artifact').item.json.notion_page_id\n        }\n      ],\n      [\n        {\n          \"text\": \"⚠️ YÊU CẦU CHỈNH SỬA\",\n          \"url\": \"={{ $env.N8N_BASE_URL || 'http://localhost:5678' }}/webhook/gate1-approval?action=reject&page_id=\" + $('Adapter: Notion → content-design artifact').item.json.notion_page_id\n        }\n      ]\n    ]\n  }\n}"
+        "jsonBody": "={\n  \"chat_id\": \"={{ $env.TELEGRAM_CHAT_ID }}\",\n  \"photo\": \"={{ $('Format photo finalists').item.json.approved_photo_url }}\",\n  \"caption\": \"🎨 *[THÔNG BÁO THIẾT KẾ ĐÃ SẴN SÀNG]*\\n\\n📌 *Content ID:* `\" + $('Adapter: Notion → content-design artifact').item.json.content_id + \"`\\n📝 *Caption Preview:* \" + $('Adapter: Notion → content-design artifact').item.json.caption.slice(0, 100) + \"...\\n\\n👉 *Trang bấm nút bên dưới để duyệt phát sóng ngay lên Instagram:*\",\n  \"parse_mode\": \"Markdown\",\n  \"reply_markup\": {\n    \"inline_keyboard\": [\n      [\n        {\n          \"text\": \"✅ DUYỆT & ĐĂNG INSTAGRAM NGAY\",\n          \"callback_data\": \"={{ 'approve:' + $('Adapter: Notion → content-design artifact').item.json.notion_page_id }}\"\n        }\n      ],\n      [\n        {\n          \"text\": \"⚠️ YÊU CẦU CHỈNH SỬA\",\n          \"callback_data\": \"={{ 'reject:' + $('Adapter: Notion → content-design artifact').item.json.notion_page_id }}\"\n        }\n      ]\n    ]\n  }\n}"
       },
       "id": "telegram-notify-approval",
-      "name": "Telegram: Gửi Ảnh & Nút Duyệt 1-Click",
+      "name": "Telegram: Gửi Ảnh & Nút Duyệt Inline",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [2360, 400],
@@ -208,7 +214,7 @@
         "unit": "hours"
       },
       "id": "gate1-wait-approval",
-      "name": "Wait for Telegram Approval / Webhook",
+      "name": "Wait for Telegram Approval Action",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [2600, 400],
@@ -223,11 +229,11 @@
           },
           "conditions": [
             {
-              "leftValue": "={{ $json.query.action || $json.body.action || 'approve' }}",
+              "leftValue": "={{ ($json.query && $json.query.action) || ($json.callback_query && $json.callback_query.data.startsWith('approve')) || 'approve' }}",
               "rightValue": "approve",
               "operator": {
                 "type": "string",
-                "operation": "equals"
+                "operation": "contains"
               }
             }
           ],
@@ -381,7 +387,7 @@
         ]
       ]
     },
-    "Trigger: On-Demand Webhook (Trang Request)": {
+    "Trigger: Telegram Bot Command / Message (Trang Request)": {
       "main": [
         [
           {
@@ -473,25 +479,25 @@
       "main": [
         [
           {
-            "node": "Telegram: Gửi Ảnh & Nút Duyệt 1-Click",
+            "node": "Telegram: Gửi Ảnh & Nút Duyệt Inline",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Telegram: Gửi Ảnh & Nút Duyệt 1-Click": {
+    "Telegram: Gửi Ảnh & Nút Duyệt Inline": {
       "main": [
         [
           {
-            "node": "Wait for Telegram Approval / Webhook",
+            "node": "Wait for Telegram Approval Action",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Wait for Telegram Approval / Webhook": {
+    "Wait for Telegram Approval Action": {
       "main": [
         [
           {

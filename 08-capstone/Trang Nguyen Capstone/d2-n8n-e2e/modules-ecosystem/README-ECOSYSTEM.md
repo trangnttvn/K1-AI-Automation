@@ -69,11 +69,11 @@ Hệ thống hoạt động theo mô hình **Micro-workflows**, trong đó các 
 ### 🔹 Module 3 — `module-3-ig-distribution-pipeline.json` (Render & Distribution)
 - **Cơ chế kích hoạt:** 
   - **Lịch tự động:** Cron Schedule vào đúng **06:00 sáng hàng ngày** (`0 6 * * *`).
-  - **Theo yêu cầu (On-Demand):** Webhook trigger nhận lệnh tức thì khi Trang bấm nút xuất bản trên Web App.
+  - **Theo yêu cầu qua Telegram (On-Demand):** **Telegram Trigger** trực tiếp. Bất cứ khi nào Trang nhắn tin cho Bot (`/post`, `/publish` hoặc gửi mã bài viết), bot sẽ kích hoạt tức thì.
 - **Nhiệm vụ:**
   - Puppeteer tự động dựng khung hình đồ họa 1080×1350 High-contrast chuẩn tỷ lệ 4:5.
-  - **Thông báo & Duyệt 1-Click qua Telegram:** Tự động gửi ảnh render kèm nội dung bài viết và 2 nút bấm Inline `[✅ DUYỆT & ĐĂNG NGAY]` / `[⚠️ YÊU CẦU SỬA]` trực tiếp vào Telegram của Trang.
-  - Khi Trang bấm duyệt trên Telegram, n8n tự động đồng bộ `Design approval = Approved` vào Notion và gọi Meta Business Graph API xuất bản bài lên Instagram Business Feed.
+  - **Thông báo & Duyệt 1-Click qua Telegram:** Tự động gửi ảnh render kèm nội dung bài viết và 2 nút bấm Inline `[✅ DUYỆT & ĐĂNG INSTAGRAM NGAY]` / `[⚠️ YÊU CẦU CHỈNH SỬA]` trực tiếp vào Telegram của Trang.
+  - Khi Trang bấm nút trên Telegram, n8n nhận Callback Query, tự động đồng bộ `Design approval = Approved` vào Notion và gọi Meta Business Graph API xuất bản bài lên Instagram Business Feed.
   - Cập nhật trạng thái bài viết thành `Posted` và gửi thông báo xác nhận kèm `Meta Post ID` qua Telegram.
 
 ### 🔹 Master Workflow — `../workflow-content-operations-pipeline.json` (E2E Controller)
