@@ -67,11 +67,14 @@ Hệ thống hoạt động theo mô hình **Micro-workflows**, trong đó các 
   - Ghi toàn bộ Full Spec vào **Notion DB 3 (`87576ad4...`)** theo mã định danh `Content ID` (ví dụ `IG-260821-FOCUS`).
 
 ### 🔹 Module 3 — `module-3-ig-distribution-pipeline.json` (Render & Distribution)
-- **Cơ chế kích hoạt:** Poll Notion DB 3 khi Trang chuyển thuộc tính `Design approval = Approved`.
+- **Cơ chế kích hoạt:** 
+  - **Lịch tự động:** Cron Schedule vào đúng **06:00 sáng hàng ngày** (`0 6 * * *`).
+  - **Theo yêu cầu (On-Demand):** Webhook trigger nhận lệnh tức thì khi Trang bấm nút xuất bản trên Web App.
 - **Nhiệm vụ:**
-  - Puppeteer tự động dựng khung hình đồ họa 1080×1350 chuẩn tỷ lệ 4:5.
-  - Gọi Meta Business Graph API xuất bản trực tiếp lên Instagram Business Feed và Facebook Page.
-  - Cập nhật trạng thái bài viết thành `Posted` và lưu `Meta Post ID` đối soát.
+  - Puppeteer tự động dựng khung hình đồ họa 1080×1350 High-contrast chuẩn tỷ lệ 4:5.
+  - **Thông báo & Duyệt 1-Click qua Telegram:** Tự động gửi ảnh render kèm nội dung bài viết và 2 nút bấm Inline `[✅ DUYỆT & ĐĂNG NGAY]` / `[⚠️ YÊU CẦU SỬA]` trực tiếp vào Telegram của Trang.
+  - Khi Trang bấm duyệt trên Telegram, n8n tự động đồng bộ `Design approval = Approved` vào Notion và gọi Meta Business Graph API xuất bản bài lên Instagram Business Feed.
+  - Cập nhật trạng thái bài viết thành `Posted` và gửi thông báo xác nhận kèm `Meta Post ID` qua Telegram.
 
 ### 🔹 Master Workflow — `../workflow-content-operations-pipeline.json` (E2E Controller)
 - **Cơ chế kích hoạt:** Webhook On-Demand nhận yêu cầu trực tiếp từ **Web App MVP (D3)**.
